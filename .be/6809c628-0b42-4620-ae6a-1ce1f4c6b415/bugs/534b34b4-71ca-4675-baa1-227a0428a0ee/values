@@ -1,0 +1,50 @@
+{
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "If it doesn't prove to be too time-consuming, it would be nice to have a dump of the clustertool-specific git-commits and commit-messages from the old repo, even it ends up just being a (searchable) text-file. It would need to be weeded out from all the non-clustertool commits throughout its history, and have any non-public info (mainly in comments) redacted...", 
+
+
+
+
+
+
+    "time": "Wed, 19 Nov 2014 15:35:13 +0000"
+
+
+
+
+
+
+}
