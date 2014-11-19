@@ -33,18 +33,31 @@
 # clustertool-funcs.sh (it is safer to always keep private function
 # code explicit anyway)
 
+# NB: for now the xx_LOOP and xx_BLOCK macro-expansions have been disabled,
+# as a potential fatal bug has been reported, and this is a quick-and-easy
+# workaround - and the parallelisation code doesn't work yet anyway, so there
+# should be no difference on the user-level other than the lack of that
+# potential bug.
+
 # Make zshell do auto word-splitting like other shells
 test -z "$ZSH_VERSION" || setopt shwordsplit
 
 _exit() { _retval="$1"; rm -f "$_tempfile1" "$_tempfile2" "$_tempfile3" >/dev/null 2>&1; exit $_retval; }
 
+## uncomment this when parallelisation is OK (see comment above)
+#_tempfile1="$(mktemp)" && _tempfile2="$(mktemp)" && _tempfile3="$(mktemp)" && \
+#    sed -n -e '/^#### BEGIN_FUNC ####$/,/^#### END_FUNC ####$/ {s/^# //; p}' "$0" >"$_tempfile1" && \
+#    sed -n -e '/^#### BEGIN_LOOP ####$/,/^#### END_LOOP ####$/ {s/^# //; p}' "$0" >"$_tempfile2" && \
+#    sed -n -e '/^#### BEGIN_BLOCK ####$/,/^#### END_BLOCK ####$/ {s/^# //; p}' "$0" >"$_tempfile3" && \
+#    sed -f "$_tempfile1" | \
+#    sed -f "$_tempfile2" | \
+#    sed -f "$_tempfile3"
+#_exit ${?:-$status}
+
+## replace this with the above when parallelisation is OK (see comment above)
 _tempfile1="$(mktemp)" && _tempfile2="$(mktemp)" && _tempfile3="$(mktemp)" && \
     sed -n -e '/^#### BEGIN_FUNC ####$/,/^#### END_FUNC ####$/ {s/^# //; p}' "$0" >"$_tempfile1" && \
-    sed -n -e '/^#### BEGIN_LOOP ####$/,/^#### END_LOOP ####$/ {s/^# //; p}' "$0" >"$_tempfile2" && \
-    sed -n -e '/^#### BEGIN_BLOCK ####$/,/^#### END_BLOCK ####$/ {s/^# //; p}' "$0" >"$_tempfile3" && \
-    sed -f "$_tempfile1" | \
-    sed -f "$_tempfile2" | \
-    sed -f "$_tempfile3"
+    sed -f "$_tempfile1"
 _exit ${?:-$status}
 
 #### BEGIN_FUNC ####

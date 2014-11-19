@@ -1,0 +1,50 @@
+{
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "reporter": "Alexandros Kiousis <alexk@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "fatal", 
+
+
+
+
+
+
+    "status": "unconfirmed", 
+
+
+
+
+
+
+    "summary": "alexk reported the script somehow receiving a \"KILL\" signal out of nowhere (problem 1), but rather than the kill at least propagating to the whole script, a subshell kept running and moved on to the next node in a cluster-roll (problem 2). I couldn't replicate this, but while investigating problem2 I found & fixed a small quirk in the kill-code which *may* be related, but that still leaves problem1, and if that is even slightly the fault of the script then it is \"not good\". Although I suspect I resolved problem2 with the small fix I just made, in case we strike problem1 again I am disabling all parallelisation source-rewriting in the meantime (as we don't use it yet anyway, and it is better to be safe than sorry)", 
+
+
+
+
+
+
+    "time": "Wed, 19 Nov 2014 15:04:36 +0000"
+
+
+
+
+
+
+}

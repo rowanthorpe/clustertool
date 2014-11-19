@@ -65,28 +65,28 @@ log_dir="$temp_dir"
 skip_recent=0
 nodetypes_to_process='not_offline not_drained'
 clustertool_tty="${TTY:-$(tty)}"
+propagate_level=0
 
 _propagate_sigs() {
+    # this recursively signals the pids and all their children (except its own pid, if present)
     _this_pid="$1"
     _sigs="${2:-TERM}"
     shift 2
+    propagate_level=`expr $propagate_level + 1`
     for _sig in $_sigs; do
-        for _pid do
-            if ! test "x$this_pid" = "x$_pid" && ps -p "$_pid" >/dev/null; then
-                /bin/kill -s 'STOP' -- "$_pid"
-                # subshell to avoid recursive namespace clashes
-                (
-                    _propagate_sigs "$_this_pid" "$_sig" $(
-                        ps -o ppid= -o pid= | sed -n -e "s/^ *${_pid} \\{1,\\}//; t PRINT; b; : PRINT; p" | tr "\\n" " "
-                    )
-                )
-                /bin/kill -s "$_sig" -- "$_pid"
-                /bin/kill -s 'CONT' -- "$_pid"
-            else
-                break
-            fi
-        done
+        eval "
+            for _pid_$propagate_level do
+                if ! test 'x$_this_pid' = \"x\$_pid_$propagate_level\" ; then
+                    /bin/kill -s 'STOP' -- \"\$_pid_$propagate_level\"
+                    _propagate_sigs '$_this_pid' '$_sig' \
+                        \$(ps -o ppid= -o pid= | sed -n -e \"s/^ *\$_pid_$propagate_level \\{1,\\}//; t PRINT; b; : PRINT; p\" | tr '\\n' ' ')
+                    /bin/kill -s '$_sig' -- \"\$_pid_$propagate_level\"
+                    /bin/kill -s 'CONT' -- \"\$_pid_$propagate_level\"
+                fi
+            done
+        "
     done
+    propagate_level=`expr $propagate_level - 1`
 }
 
 _cleanup() {
@@ -103,7 +103,7 @@ _cleanup() {
 _exit() {
     # Don't use _getargs() here - or any custom function other than _cleanup()
     # and _propagate_sigs()
-    _retval="${1:-${?:-$status}}"
+    _retval="${1:-${?:-$status}}" # can be empty...
     _sigs="$2" # can be empty...
     if test 1 -eq $parallel; then
         _pid="${3:-${top_pid_cluster:-${top_pid:-$$}}}"
@@ -112,12 +112,25 @@ _exit() {
     fi
     printf '...[cleaning up, please wait]...' >&2
     read -r _this_pid _temp </proc/self/stat
-    ## next two lines are a sledgehammer backup plan...
     trap '' TERM HUP INT
+    ## next line is a sledgehammer backup plan (remove when confident with the rest of this)...
     (setsid sh -c '/bin/sleep 1; /usr/bin/killall -9 clustertool.sh' </dev/null >/dev/null 2>&1 &)
-    _propagate_sigs "$_this_pid" "$_sigs" $(ps -o ppid= -o pid= | sed -n -e "s/^ *${_pid} \\{1,\\}//; t PRINT; b; : PRINT; p" | tr "\\n" " ")
+    # STOP $_pid
+    test "x$_this_pid" = "x$_pid" || /bin/kill -s 'STOP' "$_pid"
+    # signal all children of $_pid
+    _propagate_sigs "$_this_pid" "$_sigs" $(
+        ps -o ppid= -o pid= | sed -n -e "s/^ *${_pid} \\{1,\\}//; t PRINT; b; : PRINT; p" | tr "\\n" " "
+    )
     _cleanup
     printf "\\r$(tput el 2>/dev/null)" >&2
+    # now signal and CONTINUE $_pid
+    if ! test "x$_this_pid" = "x$_pid"; then
+        for _sig in "$_sigs"; do
+            /bin/kill -s "$_sig" "$_pid"
+        done
+        /bin/kill -s 'CONT' "$_pid"
+    fi
+    trap - TERM HUP INT
     exit $_retval
 }
 
