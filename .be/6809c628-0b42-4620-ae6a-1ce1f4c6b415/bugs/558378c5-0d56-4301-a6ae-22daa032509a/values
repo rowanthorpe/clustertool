@@ -1,0 +1,78 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "minor", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Add option-flag for not creating a logfile at all", 
+
+
+
+
+
+
+    "time": "Thu, 31 Jul 2014 14:13:52 +0000"
+
+
+
+
+
+
+}

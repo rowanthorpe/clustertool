@@ -1,0 +1,78 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "serious", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Stabilise/use intended/commented code for recursive killing in _propagate_sigs()", 
+
+
+
+
+
+
+    "time": "Thu, 18 Sep 2014 12:23:09 +0000"
+
+
+
+
+
+
+}

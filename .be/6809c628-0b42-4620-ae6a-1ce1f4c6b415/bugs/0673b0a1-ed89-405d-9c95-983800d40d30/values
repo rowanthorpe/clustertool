@@ -1,0 +1,78 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "Finish implementing specifying instances as matches (for tagging their containing nodes).", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:31:19 +0000"
+
+
+
+
+
+
+}

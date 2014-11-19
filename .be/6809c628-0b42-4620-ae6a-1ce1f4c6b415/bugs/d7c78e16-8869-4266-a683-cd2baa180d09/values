@@ -1,0 +1,92 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "BLOCKS:827c6a16-afaf-491c-937c-001d839641d0", 
+
+
+
+
+
+
+        "BLOCKS:a9989e12-7473-4d1b-817c-855cd8e33a8a", 
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "critical", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "By default, clustertool's roll() - when using e.g. hroller to get rebootgroups - seems to only process nodes which have VMs in need of migrating (based only on output from hroller). rebootgroups_roll() needs to still drain-reboot-etc nodes with no VMs in need of migrating.", 
+
+
+
+
+
+
+    "time": "Fri, 08 Aug 2014 12:44:41 +0000"
+
+
+
+
+
+
+}

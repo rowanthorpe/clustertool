@@ -1,0 +1,99 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "BLOCKS:827c6a16-afaf-491c-937c-001d839641d0", 
+
+
+
+
+
+
+        "BLOCKS:a9989e12-7473-4d1b-817c-855cd8e33a8a", 
+
+
+
+
+
+
+        "BLOCKS:d9953977-84e2-4591-aee3-b708080fb456", 
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "fatal", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Test that all private functions still work after refactoring", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 17:16:30 +0000"
+
+
+
+
+
+
+}

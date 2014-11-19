@@ -1,0 +1,78 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "Find more places where input should be sanity checked in wrapper script and in public functions (not necessary in private functions because they should only be used by well-behaved code anyway).", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:17:46 +0000"
+
+
+
+
+
+
+}

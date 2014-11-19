@@ -1,0 +1,57 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "Start new jobs with low priority (gnt-job change-priority --force --priority low $JOBID), so we can tell icinga to ignore such jobs, and in anticipation of using queue filters for fine-grained locking (without obstructing user actions).", 
+
+
+
+
+
+
+    "time": "Tue, 23 Sep 2014 08:14:07 +0000"
+
+
+
+
+
+
+}

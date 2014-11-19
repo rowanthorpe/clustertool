@@ -1,0 +1,92 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "BLOCKS:827c6a16-afaf-491c-937c-001d839641d0", 
+
+
+
+
+
+
+        "BLOCKS:a9989e12-7473-4d1b-817c-855cd8e33a8a", 
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Stella Korakaki <stella@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Redirect \"gnt-job watch\" output to /dev/null.", 
+
+
+
+
+
+
+    "time": "Mon, 01 Sep 2014 08:01:49 +0000"
+
+
+
+
+
+
+}

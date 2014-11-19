@@ -1,0 +1,18 @@
+The following might be able to provide a workaround (using non-self-signed
+certs) for any potential issues.
+
+(copied from
+http://docs.ganeti.org/ganeti/2.9/html/man-gnt-cluster.html#renew-crypto):
+
+> ...
+> To generate a new self-signed RAPI certificate (used by ganeti-rapi(8))
+> specify --new-rapi-certificate. If you want to use your own certificate,
+> e.g. one signed by a certificate authority (CA), pass its filename to
+> --rapi-certificate.
+> 
+> To generate a new self-signed SPICE certificate, used for SPICE connections to
+> the KVM hypervisor, specify the --new-spice-certificate option. If you want to
+> provide a certificate, pass its filename to --spice-certificate and pass the
+> signing CA certificate to --spice-ca-certificate.
+> ...
+

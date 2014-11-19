@@ -1,0 +1,70 @@
+===========
+clustertool
+===========
+
+
+Description
+===========
+
+This is a tool for automating/abstracting many operations on Ganeti (and other
+frameworks in future). At present it is primarily focused on automating rolling
+reboots, and requires Ganeti to be at least version 2.9
+
+It is really just a thin wrapper for functions in clustertool-funcs-public.sh -
+which can also be sourced and used from your own scripts.
+
+There is a script "clustertool-funcs-list.sh" which outputs a colourised grep of
+all function-definition and function-call lines, to give a quick and superficial
+view of the structure. This is most interesting to people who want to do their
+own scripting using the functions sourced from the ...-funcs files.
+
+Installation Considerations
+===========================
+
+This tool is constructed entirely of POSIX-compliant (or as near-POSIX-compliant
+as possible) shell-scripts with calls only to POSIX executables (except for the
+cluster-management tools of course), it is designed to work as long as all its
+files are in the same directory, and should just work out-of-the-box on any/most
+POSIX systems. In reality it's still only expected to work on a GNU/Linux
+system, calling Ganeti clusters....
+
+It should be run locally as a non-root user, as all access is based on
+non-interactive ssh/sudo on the remote servers (which must all be configured to
+allow such access).
+
+There are many options to define how the script should run, and it can/will
+faithfully do "bad things" if you ask it to, so be sure to read *all* the
+--help output before attempting to use it.
+
+
+Contact
+=======
+
+Rowan Thorpe <rowan-at-noc-dot-grnet-dot-gr>
+
+
+Footnote
+========
+
+- At present there are a few points which depend on Linux-specific and
+  Ganeti-specific behaviour. In time these will be wrapped in case statements
+  so that alternatives can be added and used based on capabilities-sniffing
+  during startup...
+
+- Some will call implementing such a tool in shell-script an exercise in
+  masochism, but there are two reasons behind the decision:
+
+ * Requiring only a POSIX-compliant shell to be present is about as
+   low-dependency as it gets, which makes it easy to run on whichever machine is
+   available (and has keys/access for the relevant servers).
+
+ * This tool is expected to be of primary (if not sole) use to
+   system-administrators who are often not developers. Such people can provide
+   immensely useful real-world suggestions, bug-reports and even patches when
+   dealing with just shell-scripting and CLI invocations. As soon as the tool
+   uses more powerful languages and many obfuscated API calls, etc much of that
+   input disappears. Having said that, to date I have had to build a rather
+   large library of cascading shell functions including first-order functions,
+   and even a reader-macro expansion layer which has all but transformed it into
+   a perversely LISP-like DSL anyway, but at least it can still be called
+   "shell-script", in principle.

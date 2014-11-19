@@ -1,0 +1,2 @@
+Definitely use at least for "maintenance" (shutdown not reboot) mode, so
+processing can continue whenever node is powered back on.

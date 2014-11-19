@@ -1,0 +1,78 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Add code generation logic to grok each _getargs() invocation, to calculate number of args and optional args, and add the following shift command automatically with the non-optional argsnum, to reduce code. The \"$@\" could also be injected automatically to further reduce code.", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:58:52 +0000"
+
+
+
+
+
+
+}

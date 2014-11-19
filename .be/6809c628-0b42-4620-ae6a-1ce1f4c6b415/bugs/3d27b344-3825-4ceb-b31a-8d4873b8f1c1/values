@@ -1,0 +1,78 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "fatal", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "When/if this repo goes public (github/gitweb/etc) be sure to redact any grnet-specific info from the entire history (URLs, etc), including from the bugs-everywhere issue-tracker history. This will make the initial repo incompatible with the new one (obviously).", 
+
+
+
+
+
+
+    "time": "Sun, 07 Sep 2014 10:37:40 +0000"
+
+
+
+
+
+
+}

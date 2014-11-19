@@ -1,0 +1,85 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "BLOCKS:a9989e12-7473-4d1b-817c-855cd8e33a8a", 
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "minor", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Make _exit() split its functions into _cleanup() and _do_exit() and call them - so e.g. _cleanup() can be called to clean lockdirs even when not exiting, like when exec-ing self (for \"clustertool [cmd] --source\").", 
+
+
+
+
+
+
+    "time": "Sun, 07 Sep 2014 15:20:11 +0000"
+
+
+
+
+
+
+}

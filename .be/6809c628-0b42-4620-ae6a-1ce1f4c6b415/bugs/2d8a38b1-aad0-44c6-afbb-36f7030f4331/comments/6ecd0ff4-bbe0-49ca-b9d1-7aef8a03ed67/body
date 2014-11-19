@@ -1,0 +1,3 @@
+In the meantime keep using drain/undrain (note: locking the whole queue is the
+approach recommended in the hroller design document, it just isn't implemented by
+them yet - working without the queue locked is a risk).

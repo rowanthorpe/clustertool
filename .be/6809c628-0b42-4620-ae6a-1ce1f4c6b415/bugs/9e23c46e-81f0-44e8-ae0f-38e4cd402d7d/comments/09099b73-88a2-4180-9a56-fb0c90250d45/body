@@ -1,0 +1,6 @@
+Unfortunately the fix in commit 95cdb40c2e18ef891f6268b0ee98c07f52661f8e
+didn't work (it seems after SSHing to the master then the master SSHes
+to the node *without* the options we added locally). This now reminds me
+I had actually tried that change manually a long time ago and gave up
+when it didn't work, and then forgot I'd tried it. Have reopened this
+issue and have undone the change :-(

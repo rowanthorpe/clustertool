@@ -1,0 +1,2 @@
+Apparently the sched-downtime script also sets a timeout so in the end there shouldn't be a need
+to "clean up" (it will do so itself within a sane duration).

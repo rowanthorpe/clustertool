@@ -1,0 +1,85 @@
+{
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "BLOCKS:827c6a16-afaf-491c-937c-001d839641d0", 
+
+
+
+
+
+
+        "BLOCKS:a9989e12-7473-4d1b-817c-855cd8e33a8a", 
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Giorgos Kargiotakis <kargig@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "minor", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Investigate if Puppet renewing certs (and asking \"trust this cert?\") will still cause any \"interactivity\" problems in non-dryrun mode.", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:54:20 +0000"
+
+
+
+
+
+
+}

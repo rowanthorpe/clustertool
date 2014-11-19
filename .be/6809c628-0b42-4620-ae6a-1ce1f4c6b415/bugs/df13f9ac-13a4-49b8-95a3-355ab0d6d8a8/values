@@ -1,0 +1,71 @@
+{
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "open", 
+
+
+
+
+
+
+    "summary": "Identify external commands with excessive output for sending to /dev/null.", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:33:22 +0000"
+
+
+
+
+
+
+}

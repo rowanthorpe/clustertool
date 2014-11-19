@@ -1,0 +1,92 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "BLOCKS:827c6a16-afaf-491c-937c-001d839641d0", 
+
+
+
+
+
+
+        "BLOCKS:a9989e12-7473-4d1b-817c-855cd8e33a8a", 
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "serious", 
+
+
+
+
+
+
+    "status": "fixed", 
+
+
+
+
+
+
+    "summary": "Add use of icinga snippet from alexk for each host before reboot (ssh icinga.domain.com sudo /usr/local/bin/sched_downtime <fqdn> <seconds>) and for node_check_up() (perhaps keep present sleep-then-check technique as fallback).", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:13:08 +0000"
+
+
+
+
+
+
+}

@@ -1,0 +1,14 @@
+(copied from alexk's email):
+
+> ...
+> To downtime που ορίζεις είναι flexible που σημαίνει ότι ξεκινάει από την
+> στιγμή που το κάνεις submit περιμένει να γίνει down το host και φεύγει
+> μόλις επανέλθει (πρακτικά δεν φεύγει, απλά γυρνάει το "is in effect" σε
+> off).
+> ...
+> Βρίσκεται στο /usr/local/bin/sched_downtime.
+> ...
+
+ -> even though "is in effect" gets unset when host is up, it seems the "good
+    housekeeping" thing to do is to still "remove downtime" when proceeding...
+

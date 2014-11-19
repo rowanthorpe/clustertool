@@ -1,0 +1,2 @@
+Code has been added to _exit() to rm all *.{log,STDOUT,STDERR}.lock files in current directory.
+When mktemp is used this should be changed to clean those instead.

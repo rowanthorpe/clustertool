@@ -1,0 +1,71 @@
+{
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Giorgos Kargiotakis <kargig@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "open", 
+
+
+
+
+
+
+    "summary": "Investigate if worth trying to solve \"add --readd\" needing non-interactve SSH access to the node from the master.", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:48:06 +0000"
+
+
+
+
+
+
+}

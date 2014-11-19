@@ -1,0 +1,18 @@
+Authors of clustertool
+See also the file ChangeLog
+
+(if anyone's name should be here and isn't, or is incorrectly credited, please
+ let Rowan Thorpe <rowan-at-noc-dot-grnet-dot-gr> know about it)
+
+===
+
+Rowan Thorpe <rowan-at-noc-dot-grnet-dot-gr>:
+  Designed and implemented clustertool
+
+Stella Korakaki <stella-at-noc-dot-grnet-dot-gr>,
+Giorgos Kargiotakis <kargig-at-noc-dot-grnet-dot-gr>,
+Alex Kiousis <alexk-at-noc-dot-grnet-dot-gr>,
+Nikos Kokkalis <nikolas-at-noc-dot-grnet-dot-gr>,
+Panagiotis Gotsis <pgotsis-at-noc-dot-grnet-dot-gr>,
+Kostis Fardelas <kosfar-at-noc-dot-grnet-dot-gr>:
+  Various suggestions, bug reports and feedback

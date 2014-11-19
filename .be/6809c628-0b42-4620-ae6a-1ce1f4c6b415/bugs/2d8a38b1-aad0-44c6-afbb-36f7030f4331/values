@@ -1,0 +1,78 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "extra_strings": [
+
+
+
+
+
+
+        "TAG:clustertool"
+
+
+
+
+
+
+    ], 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "minor", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "Use echoing json-based luxi protocol to /var/run/ganeti/socket/ganeti-query to exclusively lock the queue from the shell, to implement queue_lock and queue_unlock (and maybe nodes_lock and nodes_unlock).", 
+
+
+
+
+
+
+    "time": "Wed, 23 Jul 2014 16:49:17 +0000"
+
+
+
+
+
+
+}

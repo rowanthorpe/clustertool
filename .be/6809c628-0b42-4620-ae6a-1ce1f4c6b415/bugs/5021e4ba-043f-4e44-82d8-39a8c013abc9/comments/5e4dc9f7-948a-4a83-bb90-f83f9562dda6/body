@@ -1,0 +1,2 @@
+The functions already exist (see how _ssh_sudo() passes its commandline).
+They just haven't been used everywhere yet for simplicity's sake.

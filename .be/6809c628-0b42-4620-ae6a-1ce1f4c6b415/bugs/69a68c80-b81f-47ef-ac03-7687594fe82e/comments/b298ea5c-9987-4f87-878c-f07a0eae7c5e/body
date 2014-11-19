@@ -1,0 +1,14 @@
+Do the following for this (copied from kargig's email):
+
+> ...
+> a) issue a reboot to the VM
+> b) if VM does not reboot after 2mins (probably because the iso does not exist any more)
+>  i) ssh to the hardware node running the KVM process and kill the VM
+>  ii) restart the VM from ganeti
+> c) try to migrate the VM once again
+> 
+> Since we've warned our users that they should not leave HTTP isos on their VMs for a very long time,
+> especially on paths that don't exist any more, we have every "right" to kill the VM because they cause
+> problems to our infrastructure.
+> ...
+
