@@ -18,6 +18,7 @@ all function-definition and function-call lines, to give a quick and superficial
 view of the structure. This is most interesting to people who want to do their
 own scripting using the functions sourced from the ...-funcs files.
 
+
 Installation Considerations
 ===========================
 
@@ -35,6 +36,22 @@ allow such access).
 There are many options to define how the script should run, and it can/will
 faithfully do "bad things" if you ask it to, so be sure to read *all* the
 --help output before attempting to use it.
+
+
+Issues
+======
+
+There is a bundled "distributed bugtracker" called Bugs Everywhere (requires
+Python). It is included in many popular distros:
+
+ http://www.bugseverywhere.org
+
+Here's a quick example to browse issues:
+
+ aptitude install bugs-everywhere
+ cd [repo-dir]
+ be html
+ [browse to localhost:8000]
 
 
 Contact
