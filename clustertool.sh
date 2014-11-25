@@ -96,7 +96,7 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
   -b,--no-batch              : have an interactive prompt before every invasive
                                action (for testing/monitoring clustertool
                                behaviour safely), rather than just using
-                               defaults based on other flags
+                               defaults based on other flags (implies --verbose)
   -v,--verbose               : increase output
 
  ==> well-tested options
@@ -115,7 +115,8 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
                                denominator)
   -g,--no-reboot-groups      : when cycling by cluster or nodegroup calculate
                                nodes for rolling by iterating serially rather
-                               than using tools like hroller (enforces -s too)
+                               than using tools like hroller (implies
+                               --serial-nodes)
   -K,--skip-non-vm-capable   : skip processing non-vm-capable nodes even if they
                                are implied by the arguments
   -l,--dont-lock-cluster     : don't drain the queue and wait for it to empty
@@ -448,6 +449,7 @@ while test $# -ne 0; do
             ;;
     esac
 done
+test 1 -eq $batch || verbose=1
 if test 1 -eq $resume; then
     test -n "$log_dir" || \
         _die_u 'you must specify --log-dir when using --resume.\n'
