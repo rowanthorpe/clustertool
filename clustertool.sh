@@ -78,87 +78,88 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
 
  OPTIONS
 
-     ==> recommended options
+ ==> basic options
 
-  -v,--verbose               : increase output
+  -h,--help                  : this message
+  -q,--quiet                 : the opposite of --verbose (default)
+  -S,--source                : show source code with all sourced libs and reader
+                               macros expanded and code generation done inline
+  -V,--version               : output clustertool version information
+
+ ==> required options (for now until bugs are fixed)
+
   -s,--serial-nodes          : roll nodes serially regardless of other settings
                                implied by the arguments
 
-     ==> well-tested options
+ ==> recommended options (for now until the tool stabilises)
 
-  -h,--help                  : this message
-  -V,--version               : output clustertool version information
-  -q,--quiet                 : the opposite of --verbose (default)
+  -b,--no-batch              : have an interactive prompt before every invasive
+                               action (for testing/monitoring clustertool
+                               behaviour safely), rather than just using
+                               defaults based on other flags
+  -v,--verbose               : increase output
+
+ ==> well-tested options
+
+  -a,--alerts                : send alerts to logged in users,update /etc/motd
+  -B,--skip-recent XX        : skip rolling-reboot of nodes that clustertool has
+                               rolling-rebooted in the last XX days
+  -c,--custom-cmds-string XX : string containing custom commands to run on each
+                               node just before rebooting
+  -C,--custom-cmds-file XX   : local file containing custom commands to run on
+                               each node just before rebooting (if -c and -C are
+                               both specified -C will always be run first)
+  -d,--log-dir XX            : set the log-dir (defaults to the system temp-dir)
+  -E,--no-test-version       : don't get Ganeti version or investigate the need
+                               for workarounds (presume lowest common
+                               denominator)
+  -g,--no-reboot-groups      : when cycling by cluster or nodegroup calculate
+                               nodes for rolling by iterating serially rather
+                               than using tools like hroller (enforces -s too)
+  -K,--skip-non-vm-capable   : skip processing non-vm-capable nodes even if they
+                               are implied by the arguments
+  -l,--dont-lock-cluster     : don't drain the queue and wait for it to empty
+                               before running (NB: this is risky!)
+  -L,--dont-lock-node        : don't migrate the node atomically, migrate
+                               instance at a time without preventing other
+                               actions on the node (NB: this is really risky!)
+  -m,--mailto XX             : email log to recipient on errors/completion
+  -M,--skip-master           : skip processing the master node even if it is
   -n,--dryrun                : only output invasive commands - don't execute
-  -t,--dryrun-no-tag         : also don't execute (un)tag commands in --dryrun
-  -S,--source                : show source code with all sourced libs and reader
-                               macros expanded and code generation done inline
+  -o,--no-log                : don't use a log file (not recommended except for
+                               testing)
+  -p,--pause-watcher         : pause the watcher during actions (probably only
+                               useful for debugging)
   -r,--resume XX             : don't tag nodes before running (useful when
                                continuing a previously interrupted run), arg can
                                be "last" which appends to the last updated log
                                file (or a new one if missing), or can be the pid
                                of the previous run (see the logfile names for
                                the pid)
-  -b,--no-batch              : have an interactive prompt before every invasive
-                               action (for testing/monitoring clustertool
-                               behaviour safely), rather than just using
-                               defaults based on other flags
   -R,--no-rebalance          : don't do any rebalancing on completion
-  -l,--dont-lock-cluster     : don't drain the queue and wait for it to empty
-                               before running (NB: this is risky!)
-  -L,--dont-lock-node        : don't migrate the node atomically, migrate
-                               instance at a time without preventing other
-                               actions on the node (NB: this is really risky!)
-  -p,--pause-watcher         : pause the watcher during actions (probably only
-                               useful for debugging)
-  -c,--custom-cmds-string XX : string containing custom commands to run on each
-                               node just before rebooting
-  -C,--custom-cmds-file XX   : local file containing custom commands to run on
-                               each node just before rebooting (if -c and -C are
-                               both specified -C will always be run first)
-  -m,--mailto XX             : email log to recipient on errors/completion
-  -g,--no-reboot-groups      : when cycling by cluster or nodegroup calculate
-                               nodes for rolling by iterating serially rather
-                               than using tools like hroller (enforces -s too)
-  -a,--alerts                : send alerts to logged in users,update /etc/motd
+  -t,--dryrun-no-tag         : also don't execute (un)tag commands in --dryrun
   -T,--no-timestamps         : don't include timestamp entries in the logs
-  -M,--skip-master           : skip processing the master node even if it is
-  -B,--skip-recent XX        : skip rolling-reboot of nodes that clustertool has
-                               rolling-rebooted in the last XX days
-  -K,--skip-non-vm-capable   : skip processing non-vm-capable nodes even if they
-                               are implied by the arguments
-  -o,--no-log                : don't use a log file (not recommended except for
-                               testing)
-  -d,--log-dir XX            : set the log-dir (defaults to the system temp-dir)
-  -E,--no-test-version       : don't get Ganeti version or investigate the need
-                               for workarounds (presume lowest common
-                               denominator)
 
-     ==> not well-tested options
+ ==> not well-tested options (pay extra attention when using these)
 
   -e,--evacuate              : also clear secondaries from nodes before reboot
   -G,--nodegroups XX         : space-separated list of nodegroups to match for
                                tagging nodes for reboot
-  -N,--nodes XX              : space-separated list of nodes to tag for reboot
-                               (this also implies --serial-nodes)
   -I,--instances XX          : *TODO*: space-separated list of instances to tag
                                the containing nodes for reboot (matches primary
                                and with --evacuate also matches secondary)
-  -x,--maintenance           : rather than rebooting each node shut it down and
-                               wait for manual boot before continuing
+  -N,--nodes XX              : space-separated list of nodes to tag for reboot
+                               (this also implies --serial-nodes)
   -O|--monitor-trigger XX    : template for warning an external monitor (e.g.
                                icinga) that a node is about to go down
   -u|--monitor-check-up XX   : template for checking with external monitor if a
                                node is up, also used instead of ping-sleep-loop
                                for checking node-state at various points
+  -x,--maintenance           : rather than rebooting each node shut it down and
+                               wait for manual boot before continuing
 
-     ==> very experimental options (don't trust at all)
+ ==> very experimental options (not tested yet, YMMV)
 
-  -P,--parallel              : when tools like hroller are used nodes within
-                               reboot-groups roll in parallel by default - this
-                               option causes spawning of subshells to process as
-                               many other parts of the script as possible in
-                               parallel too (EXPERIMENTAL)
   -A,--also-offline-drained  : also process nodes which are already manually
                                offlined or drained (not recommended)
   -i,--non-redundant-action X: what to do with non-redundant instances:
@@ -176,6 +177,14 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
                                should just use the -g and -R flags to avoid use
                                of hroller and hbal and rebalance the cluster
                                manually after rolling it.
+
+ ==> broken options (don't use until bugs are fixed)
+
+  -P,--parallel              : when tools like hroller are used nodes within
+                               reboot-groups roll in parallel by default - this
+                               option causes spawning of subshells to process as
+                               many other parts of the script as possible in
+                               parallel too (EXPERIMENTAL)
 
  DESCRIPTION
 

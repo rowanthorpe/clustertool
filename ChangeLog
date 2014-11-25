@@ -1,3 +1,5 @@
+	* clustertool.sh: Alphabetise/group flags in --help output.
+
 	* clustertool-funcs.sh: Change batch,timestamps to default on.
 	* clustertool.sh: Change flag-semantics to turning them off.
 
