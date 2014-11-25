@@ -274,18 +274,14 @@ means four things:
    communicating with LUXI or RAPI sockets (with, for example netcat) instead
    of doing CLI-invocations-inside-SSH
 
- * At some point in the future I will add calls inside case-handling for
-   other cluster-frameworks like Openstack (then adding e.g. --ganeti and
-   --openstack flags to the wrapper script to distinguish).
-
 
 Footnotes
 =========
 
 * At present there are a few points which depend on Linux-specific and
   Ganeti-specific behaviour. In time these will be wrapped in case statements
-  so that alternatives can be added and used based on capabilities-sniffing
-  during startup...
+  so that alternatives can be added and used (by flags like --ganeti and
+  --openstack) based on capabilities-sniffing during startup...
 
 * Some will call implementing such a tool in shell-script an exercise in
   masochism, but there are two reasons behind the decision:
@@ -310,5 +306,5 @@ Footnotes
    (efficiency, speed, distributed computation, etc) are irrelevant in this
    case.
 
-* At present a specific workflow is catered to (passwordless sudo, key-based ssh,
-  etc). In time, but likely not soon, this will be broadened.
+* At present a specific workflow is catered to (passwordless sudo, key-based
+  ssh, etc). In time, but likely not soon, this will be broadened.
