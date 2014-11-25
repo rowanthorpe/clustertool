@@ -1,14 +1,9 @@
-	* README: Add point about the script not being the bottleneck.
-
-	* README: Clarify wording about POSIX deps
+	* README: Extensive additions and improvements (rewrite).
 
 	* clustertool.sh: Alphabetise/group flags in --help output.
 
 	* clustertool-funcs.sh: Change batch,timestamps to default on.
 	* clustertool.sh: Change flag-semantics to turning them off.
-
-	* README: Mention not-yet-beta status.
-	  clustertool.sh: Explain in comments where defaults are set.
 
 2014-11-20  Rowan Thorpe <rowan@noc.grnet.gr>
 

@@ -3,6 +3,20 @@ clustertool
 ===========
 
 
+TOC
+===
+
+* Description
+* Installation considerations
+* Issues setup
+* Contact
+* Usage
+  + Typical usage examples
+  + Tips/related tools
+* Notes for developers
+* Footnotes
+
+
 Description
 ===========
 
@@ -11,21 +25,20 @@ frameworks in future). At present it is primarily focused on automating rolling
 reboots, and requires Ganeti to be at least version 2.9
 
 It is really just a thin wrapper for functions in clustertool-funcs-public.sh -
-which can also be sourced and used from your own scripts.
+which can also be sourced and used programmatically (setting variables and
+function-args to influence their behaviour, as does the getopts in
+clustertool.sh). There is a script "clustertool-funcs-list.sh" which outputs a
+colourised index of function-definitions and callers, to give a quick overview
+of the structure.
 
-There is a script "clustertool-funcs-list.sh" which outputs a colourised grep of
-all function-definition and function-call lines, to give a quick and superficial
-view of the structure. This is most interesting to people who want to do their
-own scripting using the functions sourced from the ...-funcs files.
 
-
-Installation Considerations
+Installation considerations
 ===========================
 
 This tool is constructed entirely of POSIX-compliant (or as near-POSIX-compliant
 as possible) shell-scripts with calls only to POSIX executables (except for the
 cluster-management tools of course), it is designed to work as long as all its
-files are in the same directory, and should just work out-of-the-box on any/most
+files are in the same directory, and should just work out-of-the-box on most
 POSIX systems. In reality it's still only expected to work on a GNU/Linux
 system, calling Ganeti clusters....
 
@@ -42,8 +55,8 @@ optimum default behaviour. So read the changelogs for upgrades, at least until
 we officially go Beta.
 
 
-Issues
-======
+Issues setup
+============
 
 There is a bundled "distributed bugtracker" called Bugs Everywhere (requires
 Python). It is included in many popular distros:
@@ -53,9 +66,9 @@ Python). It is included in many popular distros:
 Here's a quick example to browse issues:
 
  aptitude install bugs-everywhere
- cd [repo-dir]
+ cd [clustertool-repo-dir]
  be html
- [browse to localhost:8000]
+ [browse to http://localhost:8000]
 
 
 Contact
@@ -64,22 +77,224 @@ Contact
 Rowan Thorpe <rowan-at-noc-dot-grnet-dot-gr>
 
 
-Footnote
-========
+Usage
+=====
 
-- At present there are a few points which depend on Linux-specific and
+For most high-level help see:
+
+ ./clustertool.sh --help | less
+
+It is strongly recommended (at least for now) to read all the --help output
+and the information below, because the tool allows you to do very powerful
+and potentially disruptive things, and "I didn't know what that flag was for
+but I used it anyway" may not get you un-fired... Having said that, the
+following are some common usage examples with safe (at the expense of speed)
+but sensible settings. If pressing a key before each invasive action drives
+you crazy, then remove the --no-batch flag, but be warned that it will then
+go like a bat-out-of-hell until it is explicitly killed or it strikes a
+non-zero exit from one of the cluster commands, so any subtly wrong settings
+or args you use will translate quickly into an epic fail.
+
+
+Typical usage examples
+----------------------
+
+ * For now --serial-nodes/--no-reboot-groups are included in all examples,
+   as they are required until a deadlock bug is fixed (--no-reboot-groups
+   implies --serial-nodes). This is the same reason --parallel can not be
+   used yet.
+
+ * For brevity not all recommended flags are used in each example, but for
+   example I recommend (at least for now) to always use --verbose and
+   --no-batch, so read all examples and combine the flags you will need.
+
+
+[1] Roll a typical cluster (with verbose console output):
+
+ ./clustertool.sh roll --verbose --serial-nodes <cluster-master-url>
+
+
+[2] Roll two clusters, using a custom log-dir (rather than system
+tempdir), and updating apt-base system before each node reboots:
+
+ ./clustertool.sh roll --serial-nodes --log-dir <my-log-dir> \
+   --custom-cmds-string 'DEBIAN_FRONTEND=noninteractive;
+                         export DEBIAN_FRONTEND;
+                         aptitude -y update;
+			 aptitude -y full-upgrade' \
+   <cluster1-master-url> <cluster2-master-url>
+
+
+[3] Roll a cluster which includes any blockdev/sharedfile/ext/rbd
+instances (hroller doesn't fully handle these disk_templates yet):
+
+ ./clustertool.sh roll --no-reboot-groups <cluster-master-url>
+
+
+[4] Roll a cluster which includes any blockdev/sharedfile/ext/rbd
+instances, on an older Ganeti version (until recently hbal also still had
+problems with these disk_templates - if unsure, you can test hbal manually
+before running clustertool):
+
+ ./clustertool.sh roll --no-reboot-groups --no-rebalance \
+   <cluster-master-url>
+ -> [then manually rebalance the nodegroups of the cluster]
+
+
+[5] Roll a typical Synnefo-based cluster - which uses Ganeti underneath
+(there is a bug where Synnefo requires snf-ganeti-eventd to be running on
+the same node as ganeti-master, but it doesn't yet automatically start it
+on the new master and stop it on the old one during a master-failover, so
+master nodes must be processed manually for now):
+
+ ./clustertool.sh roll --serial-nodes --skip-master <cluster-master-url>
+ -> [then manually roll master node (migrating snf-ganeti-eventd in synch)]
+
+
+[6] Roll one node of a typical cluster (the node url must be it's FQDN, not
+just hostname, and this flag is a bit less well-tested):
+
+ ./clustertool.sh roll --nodes <node-url> <cluster-master-url>
+
+
+[7] Read logs, rainbow-highlighting all of clustertool's log-keywords:
+
+ ./clustertool-highlight-words.sh <my-log-dir>/clustertool-roll-<pid>.log \
+   CMD_n CMD_t CMD_s CMD_n_i CMD_t_i CMD_s_i INFO MARK WARN ERROR \
+   begin_func end_func start finish resume | less -S -R
+
+
+Tips/related tools
+------------------
+
+Finding the most recent log file:
+
+ When using "--resume last" clustertool automatically appends to the most
+ recently modified log file. The easiest way to sort/display log-files by
+ recency is:
+
+  ls -lt <my-log-dir> | less -S
+
+ (most recent is at the top)
+
+Auditing through steps:
+
+ For a while it will probaby help you (and me) to use -b/--no-batch mode.
+ This means that each time, after printing any invasive command it will
+ execute, it stops and asks for you to hit the space key before actually
+ doing it. At the cost of having to follow the script's progress and hit
+ the space key a lot, you can audit its intended commands and can preempt
+ anything that looks strange and hit ctrl-C before it runs it.
+
+Dry run mode:
+
+ If you want to get an overview of everything clustertool intends to do
+ before it runs *anything* invasive, use -n/--dryrun. This will run
+ non-stop through as many of the non-invasive commands as it can (and fill
+ dummy values for those that can't have meaningful output in dry-run
+ mode), right to the end.
+
+Read logs intelligibly:
+
+ Reading or tailing the logs can be way more legible using "less -S" (most
+ lines are very long but very regular), and grepping based on command-type
+ allows you to - for example - see all commands run on the nodes for
+ manually re-running later, etc. There is also included a generic
+ keyword rainbow-highlighter called clustertool-highlight-words.sh (which
+ can highlight any specified words, in any file, not just clustertool logs)
+ and is best used with "less -R" (to accept the ANSI colour codes).
+ Combining these is a big time-saver. For example, to show all invasive
+ commands with their command-type keywords highlighted, paging with output
+ with less:
+
+  grep ':CMD_._i' [logdir]/clustertool-roll-[pid].log | \
+    ./clustertool-highlight-words.sh - CMD_n CMD_t CMD_s | \
+    less -S -R
+
+ ...or to highlight MARK lines directly from the log:
+
+  ./clustertool-highlight-words.sh [logdir]/clustertool-roll-[pid].log \
+    MARK | less -S -R
+
+Read expanded pre-execution code:
+
+ clustertool uses source-rewriting internally to save hundreds of lines of
+ boilerplate, and sources library files to separate concerns, but if you want
+ to see the exact macro-expanded, inline-included code that clustertool will
+ execute, do:
+ 
+  ./clustertool.sh --source | less -S
+
+Generate index of function-names and callers:
+
+ To generate a list of function-names and callers in all scripts and
+ library-files, use clustertool-funcs-list.sh, which generates a
+ rainbow-colour-coded index of all function names in all files, each with the
+ line-numbered grep output of all callers of that function in all files. Use
+ it like this:
+
+  ./clustertool-funcs-list.sh | less -S -R
+
+
+Notes for developers
+====================
+
+clustertool includes a wrapper script (clustertool.sh) around a set of public
+functions (clustertool-funcs-public.sh) which internally uses a set of private
+functions (clustertool-funcs.sh). All the wrapper script does is set the
+appropriate global vars based on getopts flags (see their defaults at the top
+of clustertool-funcs.sh) to run the functions in the right context (..in
+reality the script also does some initial heuristic voodoo when running in
+'--resume last' mode). The wrapper script pipes the public functions through
+clustertool-source-transform.sh before eval-ing it, to achieve some Lisp-like
+reader-macro voodoo. All public functions make calls in trickle-down fashion
+with several layers of "top-down abstraction" (read the function-names in
+clustertool-funcs-public.sh backwards from the end to get the gist). This
+means four things:
+
+ * Some functions work in slightly suboptimal ways in order to preserve
+   encapsulation, but this makes the code much more modular, legible,
+   extensible, etc. It also enables such tricks as using one simple optflag to
+   parallelise every (sane) command in the entire workflow by spawning and
+   waiting for subshells. The performance bottleneck will always be the
+   external commands running on the clusters, so micro-optimising the local
+   functions won't make any real difference anyway (and shellscript would be a
+   terrible choice of language if performance was an issue).
+
+ * clustertool-funcs-public.sh is purely a lib of shellscript functions, with
+   all functions independently meaningful/usable as long as the right vars are
+   set. Anything achievable from the wrapper script is also possible
+   programmatically by sourcing this lib.
+
+ * In fact many more things are possible by sourcing and calling public
+   functions programmatically than are possible from the wrapper script. This
+   is why the wrapper script will in due course become much more than a
+   rolling-rebooter. Due to strict encapsulation, making underlying changes
+   like the following becomes very easy and plugin-like, almost trivial:
+   communicating with LUXI or RAPI sockets (with, for example netcat) instead
+   of doing CLI-invocations-inside-SSH
+
+ * At some point in the future I will add calls inside case-handling for
+   other cluster-frameworks like Openstack (then adding e.g. --ganeti and
+   --openstack flags to the wrapper script to distinguish).
+
+
+Footnotes
+=========
+
+* At present there are a few points which depend on Linux-specific and
   Ganeti-specific behaviour. In time these will be wrapped in case statements
   so that alternatives can be added and used based on capabilities-sniffing
   during startup...
 
-- Some will call implementing such a tool in shell-script an exercise in
+* Some will call implementing such a tool in shell-script an exercise in
   masochism, but there are two reasons behind the decision:
 
- * Requiring only a POSIX-compliant shell & base utils to be present is about as
+ + Requiring only a POSIX-compliant shell & base utils to be present is about as
    low-dependency as it gets, which makes it easy to run on whichever machine is
    available (and has keys/access for the relevant servers).
 
- * This tool is expected to be of primary (if not sole) use to
+ + This tool is expected to be of primary (if not sole) use to
    system-administrators who are often not developers. Such people can provide
    immensely useful real-world suggestions, bug-reports and even patches when
    dealing with just shell-scripting and CLI invocations. As soon as the tool
@@ -90,7 +305,10 @@ Footnote
    a perversely LISP-like DSL anyway, but at least it can still be called
    "shell-script", in principle.
 
- * The user's script will effectively never be the bottleneck - the cluster
+ + The user's script will effectively never be the bottleneck - the cluster
    operations will be - so all the usual reasons for avoiding shellscripting
    (efficiency, speed, distributed computation, etc) are irrelevant in this
    case.
+
+* At present a specific workflow is catered to (passwordless sudo, key-based ssh,
+  etc). In time, but likely not soon, this will be broadened.
