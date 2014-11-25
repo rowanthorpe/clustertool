@@ -115,7 +115,7 @@ Typical usage examples
 
 
 [2] Roll two clusters, using a custom log-dir (rather than system
-tempdir), and updating apt-base system before each node reboots:
+tempdir), and updating apt-based system before each node reboots:
 
  ./clustertool.sh roll --serial-nodes --log-dir <my-log-dir> \
    --custom-cmds-string 'DEBIAN_FRONTEND=noninteractive;
