@@ -1,0 +1,57 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>",
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "Add option-flag for doing every part of a roll but just skipping the reboot (e.g. for upgrading core software which requires being out of the cluster, but doesn't require OS reboot)", 
+
+
+
+
+
+
+    "time": "Tue, 25 Nov 2014 14:21:36 +0000"
+
+
+
+
+
+
+}

@@ -1,0 +1,57 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>",
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "reporter": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "_propagate_sigs() causing \"KILLED\" output from the killing process is confusing for user, but fiddling with \"nohup\" or things like Bash's \"detach\", etc make things worse. Find a simple way to retain intuitive output and mask misleading kill-output.", 
+
+
+
+
+
+
+    "time": "Tue, 25 Nov 2014 14:16:33 +0000"
+
+
+
+
+
+
+}
