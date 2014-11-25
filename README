@@ -35,7 +35,11 @@ allow such access).
 
 There are many options to define how the script should run, and it can/will
 faithfully do "bad things" if you ask it to, so be sure to read *all* the
---help output before attempting to use it.
+--help output before attempting to use it. Also, at the moment it isn't being
+*entirely* held to the rules of "Beta", meaning that some small
+backwards-incompatible interface changes might happen as we converge on our
+optimum default behaviour. So read the changelogs for upgrades, at least until
+we officially go Beta.
 
 
 Issues

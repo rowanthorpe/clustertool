@@ -45,7 +45,8 @@ script_path="$(readlink -e "$0")"
 script="$(printf '%s' "$script_path" | sed -e 's:^.*/\([^/]\+\)$:\1:')"
 script_id=''
 
-## source functions
+## source functions (default values, which are changed below in getopts, are set
+##                   in clustertool-funcs.sh)
 libdir="$(printf '%s' "$script_path" | sed -e 's:/[^/]*$::')"
 test -n "$libdir" || libdir='/'
 . "${libdir}/clustertool-funcs.sh"

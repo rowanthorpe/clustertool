@@ -1,1 +1,33 @@
-(this will "start" from the 0.2.0 release onwards)
+	* README: Mention not-yet-beta status.
+	  clustertool.sh: Explain in comments where defaults are set.
+
+2014-11-20  Rowan Thorpe <rowan@noc.grnet.gr>
+
+	* all: Version bump to 0.2.0
+
+	* AUTHORS,README: Update authors,add bugs-everywhere install
+	  instructions.
+
+2014-11-19  Rowan Thorpe <rowan@noc.grnet.gr>
+
+	* clustertool-funcs.sh (_propagate_sigs,_exit): Fix small
+	  signal-propagation quirk - behaviour reported by Alexandros
+	  Kiousis.
+	* bugs-everywhere: Open ticket for monitoring it.
+	* clustertool-source-transform.sh: Disable parallelisation
+	  source rewriting just in case there are remaining quirks (we
+	  don't use the parallelisation anyway due to an outstanding
+	  deadlock).
+
+	* all: Initial commit of public repo (without including
+	  internal repo's commit history, yet).
+	* bugs-everywhere: Open ticket for including old commit history.
+
+2013-12-01 - 2014-11-19  Rowan Thorpe <rowan@noc.grnet.gr>
+
+	* Initial ad-hoc development before public repo started.
+
+Copyright © 2013-2014 Greek Research and Technology Network (GRNET S.A.)
+This file is part of clustertool.
+Copying and distribution of this file, with or without modification, are
+permitted provided the copyright notice and this notice are preserved.
