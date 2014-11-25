@@ -99,7 +99,9 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
                                file (or a new one if missing), or can be the pid
                                of the previous run (see the logfile names for
                                the pid)
-  -b,--batch                 : ensure absolutely no interactive prompts, use
+  -b,--no-batch              : have an interactive prompt before every invasive
+                               action (for testing/monitoring clustertool
+                               behaviour safely), rather than just using
                                defaults based on other flags
   -R,--no-rebalance          : don't do any rebalancing on completion
   -l,--dont-lock-cluster     : don't drain the queue and wait for it to empty
@@ -119,7 +121,7 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
                                nodes for rolling by iterating serially rather
                                than using tools like hroller (enforces -s too)
   -a,--alerts                : send alerts to logged in users,update /etc/motd
-  -T,--timestamps            : timestamp entries in the logs
+  -T,--no-timestamps         : don't include timestamp entries in the logs
   -M,--skip-master           : skip processing the master node even if it is
   -B,--skip-recent XX        : skip rolling-reboot of nodes that clustertool has
                                rolling-rebooted in the last XX days
@@ -269,8 +271,8 @@ while test $# -ne 0; do
             shift
             continue
             ;;
-        -b|--batch)
-            batch=1
+        -b|--no-batch)
+            batch=0
             shift
             continue
             ;;
@@ -369,8 +371,8 @@ while test $# -ne 0; do
             shift
             continue
             ;;
-        -T|--timestamps)
-            timestamps=1
+        -T|--no-timestamps)
+            timestamps=0
             shift
             continue
             ;;

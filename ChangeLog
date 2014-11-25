@@ -1,3 +1,6 @@
+	* clustertool-funcs.sh: Change batch,timestamps to default on.
+	* clustertool.sh: Change flag-semantics to turning them off.
+
 	* README: Mention not-yet-beta status.
 	  clustertool.sh: Explain in comments where defaults are set.
 
