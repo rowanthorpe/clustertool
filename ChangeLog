@@ -1,3 +1,5 @@
+	* README: Add point about the script not being the bottleneck.
+
 	* README: Clarify wording about POSIX deps
 
 	* clustertool.sh: Alphabetise/group flags in --help output.

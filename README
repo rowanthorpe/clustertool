@@ -89,3 +89,8 @@ Footnote
    and even a reader-macro expansion layer which has all but transformed it into
    a perversely LISP-like DSL anyway, but at least it can still be called
    "shell-script", in principle.
+
+ * The user's script will effectively never be the bottleneck - the cluster
+   operations will be - so all the usual reasons for avoiding shellscripting
+   (efficiency, speed, distributed computation, etc) are irrelevant in this
+   case.
