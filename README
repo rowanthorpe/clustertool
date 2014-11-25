@@ -75,7 +75,7 @@ Footnote
 - Some will call implementing such a tool in shell-script an exercise in
   masochism, but there are two reasons behind the decision:
 
- * Requiring only a POSIX-compliant shell to be present is about as
+ * Requiring only a POSIX-compliant shell & base utils to be present is about as
    low-dependency as it gets, which makes it easy to run on whichever machine is
    available (and has keys/access for the relevant servers).
 

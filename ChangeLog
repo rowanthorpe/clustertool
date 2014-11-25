@@ -1,3 +1,5 @@
+	* README: Clarify wording about POSIX deps
+
 	* clustertool.sh: Alphabetise/group flags in --help output.
 
 	* clustertool-funcs.sh: Change batch,timestamps to default on.
