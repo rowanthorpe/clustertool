@@ -121,7 +121,7 @@ tempdir), and updating apt-based system before each node reboots:
    --custom-cmds-string 'DEBIAN_FRONTEND=noninteractive;
                          export DEBIAN_FRONTEND;
                          aptitude -y update;
-			 aptitude -y full-upgrade' \
+                         aptitude -y full-upgrade' \
    <cluster1-master-url> <cluster2-master-url>
 
 

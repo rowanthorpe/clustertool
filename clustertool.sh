@@ -69,12 +69,12 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
   roll                       : reboot nodes/nodegroups/clusters in groups of
                                nodes which can tolerate rebooting together
                                (worst-case = one node-at-a-time)
-  kill                       : kill all instances, then reboot/shutdown all
-                               nodes, wait for them to all return to operational
-                               then run watchers to restore clusters (also use
-                               --maintenance to shutdown and wait for manual
-                               powerup, otherwise just reboots as quickly as
-                               possible)
+  kill                       : kill all instances (try once politely via socket,
+                               then after short timeout just kill -9), then
+                               either shutdown nodes and exit (with
+                               --maintenance) or reboot nodes and wait for them
+                               to return to operational, then run watchers to
+                               restore clusters
   test [string-to-eval]      : eval the string-argument directly following the
                                "test" command in the context of the script in
                                dryrun mode after option-parsing, and then exit
@@ -533,10 +533,10 @@ case "$command" in
         _sendmail "${script}: Completed with exit value $_retval"
         ;;
     kill)
-	kill $masters
-	_retval=${?:-$status}
-	eval "_log_mark 'finish' $(_singlequote_wrap "$invocation_cmdline")"
-	_sendmail "${script}: Completed with exit value $_retval"
-	;;
+        kill $masters
+        _retval=${?:-$status}
+        eval "_log_mark 'finish' $(_singlequote_wrap "$invocation_cmdline")"
+        _sendmail "${script}: Completed with exit value $_retval"
+        ;;
 esac
 _exit $_retval

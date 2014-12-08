@@ -258,30 +258,30 @@ instances_move() { _getargs '_master _node _direction'
 }
 
 instances_kill() { _getargs '_master _node'
+    # tolerate failures here - the point is to poweroff no matter what...
     _ssh_sudo 1 'normal' "$_node" '
         # Script based on kknd by Giorgos Kargiotakis
-        for _reps in 1 2; do
-            for _monitor in /var/run/ganeti/kvm-hypervisor/ctrl/*.monitor; do
-                printf "system_powerdown\\n" | \
-                    /usr/bin/socat STDIO UNIX-CONNECT:$monitor >/dev/null 2>&1
-            done
-            sleep 60
+        for _monitor in /var/run/ganeti/kvm-hypervisor/ctrl/*.monitor; do
+            printf "system_powerdown\\n" | \
+                /usr/bin/socat STDIO UNIX-CONNECT:$monitor >/dev/null 2>&1
         done
+        sleep 100
         #TODO: be more refined about this, dont just killall
-        killall -9 socat
-        sleep 300
+        killall -9 socat >/dev/null 2>&1
+        sleep 5
         for VM_PID in /var/run/ganeti/kvm-hypervisor/pid/*; do
-            kill -9 `cat $VM_PID`
+            kill -9 `cat $VM_PID` >/dev/null 2>&1
         done
+        sleep 10
         if test -s /proc/drbd; then
             cat /proc/drbd | \
                 grep Connected | \
                 awk -F":" "{print \$1}"  | \
                 tr -d " " | \
-                xargs -I {} drbdsetup /dev/drbd{} down
-        fi
-        sleep 2' || \
-        _die_r ${?:-$status} 'failed while killing instances on node "%s".\n' "$_node"
+                xargs -I {} -P 0 drbdsetup /dev/drbd{} down
+        fi >/dev/null 2>&1
+        sleep 10
+    '
 }
 
 #### nodes non-invasive
@@ -536,21 +536,35 @@ nodes_reboot() { _getargs '_master _kill_mode'
         fi
         test 1 -eq $_kill_mode || nodes_offline "$_master" "$_node"
         nodes_custom_commands "$_node"
-        _node_tags="$(nodes_get_tags "$_master" "$_node")"
-        # Hardcode the path to the real shutdown below to avoid molly-guard
-        if _in 'needsmaintenance' $_node_tags; then
-            _ssh_sudo 1 'normal' "$_node" "/sbin/shutdown -h now" || \
-                _die_r ${?:-$status} 'failed to shutdown node "%s".\n' "$_node"
+        _check_nodes_up=1
+        if test 1 -eq $_kill_mode; then
+            if _in 'needsmaintenance' $tags; then
+                _reboot_type='-h'
+                _check_nodes_up=0
+            else
+                _reboot_type='-r'
+            fi
         else
-            _ssh_sudo 1 'normal' "$_node" "/sbin/shutdown -r now" || \
-                _die_r ${?:-$status} 'failed to reboot node "%s".\n' "$_node"
+            _node_tags="$(nodes_get_tags "$_master" "$_node")"
+            if _in 'needsmaintenance' $_node_tags; then
+                _reboot_type='-h'
+            else
+                _reboot_type='-r'
+            fi
         fi
-        node_check_down "$_node" || \
-            _die_r ${?:-$status} 'node "%s" failed to power off before the timeout.\n' "$_node"
-        # For maintenance mode set loop-till-pingable limit to "0" to wait indefinitely
-        node_check_up "$_node" $(! _in 'needsmaintenance' $_node_tags || printf -- 0) || \
-            _die_r ${?:-$status} 'node "%s" failed to return to responsive ssh level.\n' "$_node"
-        test 1 -eq $_kill_mode || nodes_online "$_master" "$_node"
+        # Hardcode the path to the real shutdown below to avoid molly-guard
+        _ssh_sudo 1 'normal' "$_node" "/sbin/shutdown $_reboot_type now" || \
+            _die_r ${?:-$status} 'failed to %s node "%s".\n' "$(
+                if test x-r = x$_reboot_type; then printf 'reboot'; else printf 'shutdown'; fi
+            )" "$_node"
+        if test 1 -eq $_check_nodes_up; then
+            node_check_down "$_node" || \
+                _die_r ${?:-$status} 'node "%s" failed to power off before the timeout.\n' "$_node"
+            # For maintenance mode set loop-till-pingable limit to "0" to wait indefinitely
+            node_check_up "$_node" $(! _in 'needsmaintenance' $_node_tags || printf -- 0) || \
+                _die_r ${?:-$status} 'node "%s" failed to return to responsive ssh level.\n' "$_node"
+            test 1 -eq $_kill_mode || nodes_online "$_master" "$_node"
+        fi
     done         # @PAR_LOOP_END@
 }
 
@@ -843,12 +857,12 @@ nodegroups_tag() { _getargs '_tags _what _master'
 
 nodegroups_untag() { _getargs '_tags _what _master'
     for _nodegroup do # @PAR_LOOP_BEGIN@
-	if _in "$_what" 'nodegroups' 'clusters'; then
+        if _in "$_what" 'nodegroups' 'clusters'; then
             _ssh_sudo 1 'tag' "$_master" "gnt-group remove-tags '$_nodegroup' $_tags" || \
-		_die_r ${?:-$status} 'failed to remove "%s" tags from nodegroup "%s".\n' "$_tags" "$_nodegroup"
-	else
+                _die_r ${?:-$status} 'failed to remove "%s" tags from nodegroup "%s".\n' "$_tags" "$_nodegroup"
+        else
             nodes_untag "$_tags" "$_master" $(nodes_get "$nodetypes_to_process" '' 1 "$_master" "$_nodegroup")
-	fi
+        fi
     done              # @PAR_LOOP_END@
 }
 
@@ -1054,10 +1068,12 @@ prerun() { _getargs '_cmd'
     test -z "$nodes" || _warn '  (nodes %s)\n' "$nodes"
     test -z "$instances" || _die 'specifying instances as matches (for matching their containing nodes) is not yet implemented.\n'
     #TODO: test -z "$instances" || _warn '  (instances %s)\n' "$instances"
-    _warn 'ARE YOU SURE? (Ctrl-C in the next 10 seconds if not).\n'
-    if test 1 -ne $dryrun; then
-        sleep 10
-        actions_started=1
+    if ! test 'kill' = "$_cmd" || test 1 -ne $maintenance; then
+        _warn 'ARE YOU SURE? (Ctrl-C in the next 10 seconds if not).\n'
+        if test 1 -ne $dryrun; then
+            sleep 10
+            actions_started=1
+        fi
     fi
 }
 
