@@ -213,7 +213,15 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
 
   ...the monitor-trigger should return zero unless something is wrong enough to
   stop clustertool, and the return value of the monitor-check-up is how the
-  state of the node is indicated.
+  state of the node is indicated. Unlike --custom-cmds-file and
+  --custom-cmds-string (which are run on the node inside _ssh_sudo), the monitor
+  commands are eval-ed as-is, as they often need to be run on a different server
+  entirely (e.g. a downtime command on an Icinga server). This means:
+   * the necessary ssh commands (or wrapper functions from clustertool) need to
+     be included (see above example)
+   * if not using clustertool wrapper-ssh commands, there is no "dryrun"
+     handling so you must either omit the flag during dryruns, or add your own
+     handling of the \$dryrun variable
 
 EOF
 }
