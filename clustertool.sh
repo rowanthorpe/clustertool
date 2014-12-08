@@ -509,12 +509,12 @@ case "$command" in
         read -r top_pid _temp </proc/self/stat
         eval "$test_string"
         _retval=${?:-$status}
-        eval "_log_mark finish $(_singlequote_wrap "$invocation_cmdline")"
+        eval "_log_mark 'finish' $(_singlequote_wrap "$invocation_cmdline")"
         ;;
     roll)
         roll $masters
         _retval=${?:-$status}
-        eval "_log_mark finish $(_singlequote_wrap "$invocation_cmdline")"
+        eval "_log_mark 'finish' $(_singlequote_wrap "$invocation_cmdline")"
         _sendmail "${script}: Completed with exit value $_retval"
         ;;
 esac

@@ -466,7 +466,7 @@ nodes_custom_commands() {
             _ssh_sudo 1 'normal' "$_node" "$_commands_string" || \
                 _die_r ${?:-$status} 'failed running custom commands from file "%s" on node "%s".\n' "$custom_commands_file" "$_node"
         fi
-        # *don't* split here for parallelisation...
+        # *don't* split here, for parallelisation...
         if test -n "$custom_commands_string"; then
             _ssh_sudo 1 'normal' "$_node" "$custom_commands_string" || \
                 _die_r ${?:-$status} 'failed running commands from string "%s" on node "%s".\n' "$custom_commands_string" "$_node"
@@ -520,7 +520,7 @@ nodes_reboot() { _getargs '_master'
         fi
         node_check_down "$_node" || \
             _die_r ${?:-$status} 'node "%s" failed to power off before the timeout.\n' "$_node"
-        # For maintenance mode set loop-till-pingable limit to "0" (infinite) to wait indefinitely
+        # For maintenance mode set loop-till-pingable limit to "0" to wait indefinitely
         node_check_up "$_node" $(! _in 'needsmaintenance' $_node_tags || printf -- 0) || \
             _die_r ${?:-$status} 'node "%s" failed to return to responsive ssh level.\n' "$_node"
         nodes_online "$_master" "$_node"
@@ -559,22 +559,22 @@ nodes_alert() { _getargs '_type'
     if test 1 -eq $alerts; then
         case "$_type" in
             start)
-                _string='A rolling reboot has been scheduled for this cluster. This node will reboot sometime during the next few minutes (or up to a few hours). You will get another warning one minute before it happens.'
+                _string='A rolling reboot has been scheduled for this cluster. This node will reboot/shutdown sometime during the next few minutes (or up to a few hours). You will get another warning one minute before it happens.'
                 ;;
             final)
-                _string='As part of a rolling reboot this node will reboot in one minute...'
+                _string='As part of a rolling reboot this node will reboot/shutdown in one minute...'
                 ;;
         esac
         # $_motd_string must be a oneliner
-        _motd_string='** THIS NODE WILL REBOOT VERY SOON AS PART OF A ROLLING REBOOT **'
+        _motd_string='** THIS NODE WILL REBOOT/SHUTDOWN VERY SOON AS PART OF A ROLLING REBOOT **'
         for _node do # @PAR_LOOP_BEGIN@
             # @PAR_BLOCK_BEGIN@
             ! test final = "$_type" || \
                 _ssh_sudo 1 'normal' "$_node" "if ! grep -q -x -F $(_singlequote_wrap "$_motd_string") /etc/motd; then cp -f /etc/motd /etc/motd.clustertool-backup && { sed -e '\$! b; /^\$/ b; s/\$/\\n/' /etc/motd.clustertool-backup | sed -e '\$! b; /^\$/ b; s/\$/\\n/' && printf '%s\\n' $(_singlequote_wrap "$_motd_string"); } >/etc/motd; fi" || \
-                _die_r ${?:-$status} 'failed updating motd file with upcoming reboot alert on node "%s".\n' "$_node"
+                _die_r ${?:-$status} 'failed updating motd file with upcoming reboot/shutdown alert on node "%s".\n' "$_node"
             # @PAR_BLOCK_BARRIER@
             _ssh_sudo 1 'normal' "$_node" "printf '%s\\n' $(_singlequote_wrap "$_string") | wall -t 30" || \
-                _die_r ${?:-$status} 'failed alerting logged in users about upcoming reboot on node "%s".\n' "$_node"
+                _die_r ${?:-$status} 'failed alerting logged in users about upcoming reboot/shutdown on node "%s".\n' "$_node"
             # @PAR_BLOCK_END@
         done         # @PAR_LOOP_END@
     fi
@@ -980,7 +980,7 @@ roll_prerun() {
     _warn '  (master-nodes) %s\n' "$masters"
     test -z "$nodegroups" || _warn '  (nodegroups %s)\n' "$nodegroups"
     test -z "$nodes" || _warn '  (nodes %s)\n' "$nodes"
-    test -z "$instances" || _die 'specifying instances as matches (for tagging only their containing nodes) is not yet implemented.\n'
+    test -z "$instances" || _die 'specifying instances as matches (for matching their containing nodes) is not yet implemented.\n'
     #TODO: test -z "$instances" || _warn '  (instances %s)\n' "$instances"
     _warn 'ARE YOU SURE? (Ctrl-C in the next 10 seconds if not).\n'
     if test 1 -ne $dryrun; then
@@ -1015,7 +1015,7 @@ roll() { set -- $(masters_canonical_get $masters)
         # @PAR_BLOCK_BEGIN@
         clusters_tag "$tags" "$_master"
         # @PAR_BLOCK_BARRIER@
-        clusters_alert start "$_master"
+        clusters_alert 'start' "$_master"
         # @PAR_BLOCK_END@
         _alert_pause
         roll_start "$_master"
@@ -1024,4 +1024,4 @@ roll() { set -- $(masters_canonical_get $masters)
     done           # @PAR_LOOP_END@
 }
 
-#### [keep this reminder to retain the preceding blank line]
+#### [keep this reminder to retain the preceding blank line for source-rewriting]
