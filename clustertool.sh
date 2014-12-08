@@ -69,9 +69,12 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
   roll                       : reboot nodes/nodegroups/clusters in groups of
                                nodes which can tolerate rebooting together
                                (worst-case = one node-at-a-time)
-  kill                       : kill all instances, then shutdown all nodes, wait
-                               for them to all return to operational then run
-                               watchers to restore clusters
+  kill                       : kill all instances, then reboot/shutdown all
+                               nodes, wait for them to all return to operational
+                               then run watchers to restore clusters (also use
+                               --maintenance to shutdown and wait for manual
+                               powerup, otherwise just reboots as quickly as
+                               possible)
   test [string-to-eval]      : eval the string-argument directly following the
                                "test" command in the context of the script in
                                dryrun mode after option-parsing, and then exit
