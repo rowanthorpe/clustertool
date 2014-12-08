@@ -259,7 +259,7 @@ _lock() { _getargs '_locktype _lockfile _to_eval' "$@"; shift $_to_shift
 }
 
 _stdout_write() { _getargs '_proc_id' "$@"; shift $_to_shift
-    if test 1 -eq $parallel; then
+    if test 1 -eq $parallel && tty -s; then
         _lockfile="${temp_dir}${temp_dir:+/}clustertool-${command}-${_proc_id}.STDOUT.lock"
         _lock -x "$_lockfile" cat
     else
