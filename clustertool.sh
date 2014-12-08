@@ -69,6 +69,9 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
   roll                       : reboot nodes/nodegroups/clusters in groups of
                                nodes which can tolerate rebooting together
                                (worst-case = one node-at-a-time)
+  kill                       : kill all instances, then shutdown all nodes, wait
+                               for them to all return to operational then run
+                               watchers to restore clusters
   test [string-to-eval]      : eval the string-argument directly following the
                                "test" command in the context of the script in
                                dryrun mode after option-parsing, and then exit
@@ -191,7 +194,8 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
 
   This is a tool for automating/abstracting many operations on Ganeti (and other
   frameworks in future). At present it is primarily focused on automating
-  rolling reboots, and requires Ganeti to be at least version 2.9
+  rolling reboots or instances-and-nodes kills, and requires Ganeti to be at
+  least version 2.9
 
   It is really just a thin wrapper for functions in clustertool-funcs-public.sh
   - which can also be sourced and used from your own scripts.
@@ -517,5 +521,11 @@ case "$command" in
         eval "_log_mark 'finish' $(_singlequote_wrap "$invocation_cmdline")"
         _sendmail "${script}: Completed with exit value $_retval"
         ;;
+    kill)
+	kill $masters
+	_retval=${?:-$status}
+	eval "_log_mark 'finish' $(_singlequote_wrap "$invocation_cmdline")"
+	_sendmail "${script}: Completed with exit value $_retval"
+	;;
 esac
 _exit $_retval

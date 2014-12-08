@@ -257,6 +257,33 @@ instances_move() { _getargs '_master _node _direction'
     fi
 }
 
+instances_kill() { _getargs '_master _node'
+    _ssh_sudo 1 'normal' "$_node" '
+        # Script based on kknd by Giorgos Kargiotakis
+        for _reps in 1 2; do
+            for _monitor in /var/run/ganeti/kvm-hypervisor/ctrl/*.monitor; do
+                printf "system_powerdown\\n" | \
+                    /usr/bin/socat STDIO UNIX-CONNECT:$monitor >/dev/null 2>&1
+            done
+            sleep 60
+        done
+        #TODO: be more refined about this, dont just killall
+        killall -9 socat
+        sleep 300
+        for VM_PID in /var/run/ganeti/kvm-hypervisor/pid/*; do
+            kill -9 `cat $VM_PID`
+        done
+        if test -s /proc/drbd; then
+            cat /proc/drbd | \
+                grep Connected | \
+                awk -F":" "{print \$1}"  | \
+                tr -d " " | \
+                xargs -I {} drbdsetup /dev/drbd{} down
+        fi
+        sleep 2' || \
+        _die_r ${?:-$status} 'failed while killing instances on node "%s".\n' "$_node"
+}
+
 #### nodes non-invasive
 
 nodes_get() { _getargs '_node_types _tag_types _filtered _master'
@@ -490,13 +517,13 @@ nodes_get_tags() { _getargs '_master'
     } | sed -e 's/,/ /g' | _uniq_list_pipe
 }
 
-nodes_reboot() { _getargs '_master'
+nodes_reboot() { _getargs '_master _kill_mode'
     for _node do # @PAR_LOOP_BEGIN@
         # Last sanity check for paranoia's sake, before rebooting
         # NB: this will all have to be changed when Ganeti team change disk_template
         #     semantics (in ~v2.13 ?), as per
         #     http://docs.ganeti.org/ganeti/master/html/design-storagetypes.html
-        if test 1 -ne $dryrun; then
+        if test 1 -ne $dryrun && test 1 -ne $_kill_mode; then
             test -z "$(instances_get 'primary' 'not_plain not_file' 0 "$_master" "$_node")" || \
                 _die 'not rebooting node "%s" because there are still primary redundant instances on it.\n' "$_node"
             test 'ignore' = "$non_redundant_action" || \
@@ -507,7 +534,7 @@ nodes_reboot() { _getargs '_master'
             eval "$(printf '%s' "$monitor_trigger_template" | sed -e "s/{}/$(_singlequote_wrap "$_node")/g")" || \
                 _die_r ${?:-$status} 'failed executing monitor trigger for node "%s" using template: "%s".\n' "$monitor_trigger_template" "$_node"
         fi
-        nodes_offline "$_master" "$_node"
+        test 1 -eq $_kill_mode || nodes_offline "$_master" "$_node"
         nodes_custom_commands "$_node"
         _node_tags="$(nodes_get_tags "$_master" "$_node")"
         # Hardcode the path to the real shutdown below to avoid molly-guard
@@ -523,7 +550,7 @@ nodes_reboot() { _getargs '_master'
         # For maintenance mode set loop-till-pingable limit to "0" to wait indefinitely
         node_check_up "$_node" $(! _in 'needsmaintenance' $_node_tags || printf -- 0) || \
             _die_r ${?:-$status} 'node "%s" failed to return to responsive ssh level.\n' "$_node"
-        nodes_online "$_master" "$_node"
+        test 1 -eq $_kill_mode || nodes_online "$_master" "$_node"
     done         # @PAR_LOOP_END@
 }
 
@@ -559,14 +586,14 @@ nodes_alert() { _getargs '_type'
     if test 1 -eq $alerts; then
         case "$_type" in
             start)
-                _string='A rolling reboot has been scheduled for this cluster. This node will reboot/shutdown sometime during the next few minutes (or up to a few hours). You will get another warning one minute before it happens.'
+                _string='A rolling reboot or kill has been scheduled for this cluster. This node will reboot/shutdown sometime during the next few minutes (or up to a few hours). You will get another warning one minute before it happens.'
                 ;;
             final)
-                _string='As part of a rolling reboot this node will reboot/shutdown in one minute...'
+                _string='As part of a rolling reboot/kill this node will reboot/shutdown in one minute...'
                 ;;
         esac
         # $_motd_string must be a oneliner
-        _motd_string='** THIS NODE WILL REBOOT/SHUTDOWN VERY SOON AS PART OF A ROLLING REBOOT **'
+        _motd_string='** THIS NODE WILL REBOOT/SHUTDOWN VERY SOON AS PART OF A ROLLING REBOOT/KILL **'
         for _node do # @PAR_LOOP_BEGIN@
             # @PAR_BLOCK_BEGIN@
             ! test final = "$_type" || \
@@ -593,7 +620,7 @@ nodes_tag() { _getargs '_tags _master'
     if test 1 -ne $resume; then
         for _node do # @PAR_LOOP_BEGIN@
             _ssh_sudo 1 'tag' "$_master" "gnt-node add-tags '$_node' $_tags" || \
-                _die_r ${?:-$status} 'failed setting "%s" tags on node "%s".\n' "$_tags" "$_master"
+                _die_r ${?:-$status} 'failed setting "%s" tags on node "%s".\n' "$_tags" "$_node"
         done         # @PAR_LOOP_END@
     fi
 }
@@ -682,7 +709,7 @@ nodes_roll() { _getargs '_parallel _only_reboot _master'
             fi
             nodes_alert final "$_node"
             _alert_pause
-            nodes_reboot "$_master" "$_node"
+            nodes_reboot "$_master" 0 "$_node"
             instances_move "$_master" "$_node" 'to' $_moved_instances
             # Use watcher instead for now (see comment above)
             #instances_activate_disks "$_master" $_drbd_instances
@@ -714,6 +741,13 @@ nodes_roll() { _getargs '_parallel _only_reboot _master'
         test -z "$_temp_candidates" || candidates_revert "$_master" $_temp_candidates
     fi
     parallel=$_orig_parallel
+}
+
+nodes_kill() { _getargs '_master'
+    for _node do # @PAR_LOOP_BEGIN@
+        instances_kill "$_master" "$_node"
+        nodes_reboot "$_master" 1 "$_node"
+    done         # @PAR_LOOP_END@
 }
 
 #### rebootgroups non-invasive
@@ -794,17 +828,27 @@ nodegroups_alert_remove() { _getargs '_master'
     fi
 }
 
-nodegroups_tag() { _getargs '_tags _master'
+nodegroups_tag() { _getargs '_tags _what _master'
     if test 1 -ne $resume; then
         for _nodegroup do # @PAR_LOOP_BEGIN@
-            nodes_tag "$_tags" "$_master" $(nodes_get "$nodetypes_to_process" '' 1 "$_master" "$_nodegroup")
+            if _in "$_what" 'nodegroups' 'clusters'; then
+                _ssh_sudo 1 'tag' "$_master" "gnt-group add-tags '$_nodegroup' $_tags" || \
+                    _die_r ${?:-$status} 'failed setting "%s" tags on nodegroup "%s".\n' "$_tags" "$_nodegroup"
+            else
+                nodes_tag "$_tags" "$_master" $(nodes_get "$nodetypes_to_process" '' 1 "$_master" "$_nodegroup")
+            fi
         done              # @PAR_LOOP_END@
     fi
 }
 
-nodegroups_untag() { _getargs '_tags _master'
+nodegroups_untag() { _getargs '_tags _what _master'
     for _nodegroup do # @PAR_LOOP_BEGIN@
-        nodes_untag "$_tags" "$_master" $(nodes_get "$nodetypes_to_process" '' 1 "$_master" "$_nodegroup")
+	if _in "$_what" 'nodegroups' 'clusters'; then
+            _ssh_sudo 1 'tag' "$_master" "gnt-group remove-tags '$_nodegroup' $_tags" || \
+		_die_r ${?:-$status} 'failed to remove "%s" tags from nodegroup "%s".\n' "$_tags" "$_nodegroup"
+	else
+            nodes_untag "$_tags" "$_master" $(nodes_get "$nodetypes_to_process" '' 1 "$_master" "$_nodegroup")
+	fi
     done              # @PAR_LOOP_END@
 }
 
@@ -816,6 +860,12 @@ nodegroups_roll() { _getargs '_master'
             nodes_roll 0 0 "$_master" $(nodes_get "$nodetypes_to_process" 'needsreboot' 1 "$_master" "$_nodegroup")
         fi
         nodegroups_rebalance "$_master" "$_nodegroup"
+    done              # @PAR_LOOP_END@
+}
+
+nodegroups_kill() { _getargs '_master'
+    for _nodegroup do # @PAR_LOOP_BEGIN@
+        nodes_kill "$_master" $(nodes_get '' '' 1 "$_master" "$_nodegroup")
     done              # @PAR_LOOP_END@
 }
 
@@ -953,17 +1003,27 @@ clusters_alert_remove() {
     fi
 }
 
-clusters_tag() { _getargs '_tags'
+clusters_tag() { _getargs '_tags _what'
     if test 1 -ne $resume; then
         for _master do # @PAR_LOOP_BEGIN@
-            nodegroups_tag "$_tags" "$_master" $(nodegroups_get "$_master")
+            if _in "$_what" 'clusters'; then
+                _ssh_sudo 1 'tag' "$_master" "gnt-cluster add-tags '$_master' $_tags" || \
+                    _die_r ${?:-$status} 'failed setting "%s" tags on cluster with master "%s".\n' "$_tags" "$_master"
+            else
+                nodegroups_tag "$_tags" "$_what" "$_master" $(nodegroups_get "$_master")
+            fi
         done           # @PAR_LOOP_END@
     fi
 }
 
-clusters_untag() { _getargs '_tags'
+clusters_untag() { _getargs '_tags _what'
     for _master do # @PAR_LOOP_BEGIN@
-        nodegroups_untag "$_tags" "$_master" $(nodegroups_get "$_master")
+        if _in "$_what" 'clusters'; then
+            _ssh_sudo 1 'tag' "$_master" "gnt-cluster remove-tags '$_master' $_tags" || \
+                _die_r ${?:-$status} 'failed to remove "%s" tags from cluster with master "%s".\n' "$_tags" "$_master"
+        else
+            nodegroups_untag "$_tags" "$_what" "$_master" $(nodegroups_get "$_master")
+        fi
     done           # @PAR_LOOP_END@
 }
 
@@ -973,10 +1033,22 @@ clusters_roll() {
     done           # @PAR_LOOP_END@
 }
 
+clusters_kill() {
+    for _master do # @PAR_LOOP_BEGIN@
+        nodegroups_kill "$_master" $(nodegroups_get "$_master")
+        watchers_run "$_master"
+        # @PAR_BLOCK_BEGIN@
+        clusters_alert_remove "$_master"
+        # @PAR_BLOCK_BARRIER@
+        clusters_untag 'locked' 'nodegroups' "$_master"
+        # @PAR_BLOCK_END@
+    done           # @PAR_LOOP_END@
+}
+
 #### main invasive
 
-roll_prerun() {
-    _warn 'About to execute rolling reboot on nodes which match:\n'
+prerun() { _getargs '_cmd'
+    _warn 'About to execute %s on nodes which match:\n' "$_cmd"
     _warn '  (master-nodes) %s\n' "$masters"
     test -z "$nodegroups" || _warn '  (nodegroups %s)\n' "$nodegroups"
     test -z "$nodes" || _warn '  (nodes %s)\n' "$nodes"
@@ -989,7 +1061,7 @@ roll_prerun() {
     fi
 }
 
-roll_start() {
+start() {
     queues_lock "$@"
     watchers_pause "$@"
     if test 1 -ne $serial_nodes && test 5 -gt $(
@@ -1001,7 +1073,7 @@ roll_start() {
     fi
 }
 
-roll_finish() {
+finish() {
     watchers_unpause "$@"
     queues_unlock "$@"
     clusters_verify "$@"
@@ -1009,19 +1081,35 @@ roll_finish() {
 
 roll() { set -- $(masters_canonical_get $masters)
     read -r top_pid _temp </proc/self/stat
-    roll_prerun
+    prerun 'roll'
     for _master do # @PAR_LOOP_BEGIN@
         read -r top_pid_cluster _temp </proc/self/stat
         # @PAR_BLOCK_BEGIN@
-        clusters_tag "$tags" "$_master"
+        clusters_tag "$tags" 'nodes' "$_master"
         # @PAR_BLOCK_BARRIER@
         clusters_alert 'start' "$_master"
         # @PAR_BLOCK_END@
         _alert_pause
-        roll_start "$_master"
+        start "$_master"
         clusters_roll "$_master"
-        roll_finish "$_master"
+        finish "$_master"
     done           # @PAR_LOOP_END@
+}
+
+kill() { set -- $(masters_canonical_get $masters)
+    read -r top_pid _temp </proc/self/stat
+    prerun 'kill'
+    for _master do # @PAR_LOOP_BEGIN@
+        read -r top_pid_cluster _temp </proc/self/stat
+        # @PAR_BLOCK_BEGIN@
+        clusters_tag 'locked' 'nodegroups' "$_master"
+        # @PAR_BLOCK_BARRIER@
+        clusters_alert 'start' "$_master"
+        # @PAR_BLOCK_END@
+        start "$_master"
+        clusters_kill "$_master"
+        finish "$_master"
+    done          # @PAR_LOOP_END@
 }
 
 #### [keep this reminder to retain the preceding blank line for source-rewriting]
