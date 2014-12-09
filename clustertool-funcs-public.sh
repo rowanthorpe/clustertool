@@ -494,7 +494,7 @@ nodes_custom_commands() {
             _ssh_sudo 1 'normal' "$_node" "$_commands_string" || \
                 _die_r ${?:-$status} 'failed running custom commands from file "%s" on node "%s".\n' "$custom_commands_file" "$_node"
         fi
-        # *don't* split here, for parallelisation...
+        # *don't* split for parallelisation here...
         if test -n "$custom_commands_string"; then
             _ssh_sudo 1 'normal' "$_node" "$custom_commands_string" || \
                 _die_r ${?:-$status} 'failed running commands from string "%s" on node "%s".\n' "$custom_commands_string" "$_node"
