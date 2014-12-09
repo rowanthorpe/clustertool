@@ -233,9 +233,9 @@ EOF
 command="$1"
 test 0 -eq $# || shift
 case "$command" in
-    -h|--help)
+    -h|--help|'')
         _usage
-        _exit
+        exit 0
         ;;
     -V|--version)
         cat <<EOV
@@ -245,7 +245,7 @@ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 EOV
-        _exit
+        exit 0
         ;;
     -S|--source)
         sed -e 's:^\. "\${libdir}/clustertool-funcs\.sh"$:#### BEGIN SOURCED PRIVATE LIB ####:; t END; b; : END; q' "$script_path" && \
@@ -255,7 +255,7 @@ EOV
             sed -e '1,/^eval "\$(cat "\${libdir}\/clustertool-funcs-public\.sh" | "\${libdir}\/clustertool-source-transform\.sh")\"\$/ d' "${libdir}/clustertool-funcs.sh" && \
             printf '#### END SOURCED PRIVATE LIB ####\n' && \
             sed -e '1,/^\. "\${libdir}\/clustertool-funcs\.sh"$/ d' "$script_path"
-        _exit
+        exit 0
         ;;
     test)
         test_string="$1"
