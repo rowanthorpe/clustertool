@@ -261,7 +261,7 @@ EOV
         test_string="$1"
         shift || _die_u 'no string argument provided for testing.\n'
         ;;
-    roll)
+    roll|kill)
         true
         ;;
     *)
