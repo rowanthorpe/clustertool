@@ -257,8 +257,9 @@ instances_move() { _getargs '_master _node _direction'
     fi
 }
 
-instances_kill() { _getargs '_master _node'
-    # tolerate failures here - the point is to poweroff no matter what...
+instances_kill() { _getargs '_kill_mode _node'
+    #TODO: have a more patient version of this if $_kill_mode is 1
+    # Tolerate failures here - the point is to poweroff no matter what...
     _ssh_sudo 1 'normal' "$_node" '
         # Script based on kknd by Giorgos Kargiotakis
         for _monitor in /var/run/ganeti/kvm-hypervisor/ctrl/*.monitor; do
@@ -517,13 +518,13 @@ nodes_get_tags() { _getargs '_master'
     } | sed -e 's/,/ /g' | _uniq_list_pipe
 }
 
-nodes_reboot() { _getargs '_master _kill_mode'
+nodes_reboot() { _getargs '_kill_mode _master'
     for _node do # @PAR_LOOP_BEGIN@
         # Last sanity check for paranoia's sake, before rebooting
         # NB: this will all have to be changed when Ganeti team change disk_template
         #     semantics (in ~v2.13 ?), as per
         #     http://docs.ganeti.org/ganeti/master/html/design-storagetypes.html
-        if test 1 -ne $dryrun && test 1 -ne $_kill_mode; then
+        if test 1 -ne $dryrun && test 0 -eq $_kill_mode; then
             test -z "$(instances_get 'primary' 'not_plain not_file' 0 "$_master" "$_node")" || \
                 _die 'not rebooting node "%s" because there are still primary redundant instances on it.\n' "$_node"
             test 'ignore' = "$non_redundant_action" || \
@@ -534,23 +535,21 @@ nodes_reboot() { _getargs '_master _kill_mode'
             eval "$(printf '%s' "$monitor_trigger_template" | sed -e "s/{}/$(_singlequote_wrap "$_node")/g")" || \
                 _die_r ${?:-$status} 'failed executing monitor trigger for node "%s" using template: "%s".\n' "$monitor_trigger_template" "$_node"
         fi
-        test 1 -eq $_kill_mode || nodes_offline "$_master" "$_node"
+        test 0 -ne $_kill_mode || nodes_offline "$_master" "$_node"
         nodes_custom_commands "$_node"
         _check_nodes_up=1
-        if test 1 -eq $_kill_mode; then
-            if _in 'needsmaintenance' $tags; then
-                _reboot_type='-h'
-                _check_nodes_up=0
-            else
-                _reboot_type='-r'
-            fi
-        else
+        if test 0 -eq $_kill_mode; then
             _node_tags="$(nodes_get_tags "$_master" "$_node")"
             if _in 'needsmaintenance' $_node_tags; then
                 _reboot_type='-h'
             else
                 _reboot_type='-r'
             fi
+        elif test 1 -eq $_kill_mode; then
+            _reboot_type='-r'
+        else
+            _reboot_type='-h'
+            _check_nodes_up=0
         fi
         # Hardcode the path to the real shutdown below to avoid molly-guard
         _ssh_sudo 1 'normal' "$_node" "/sbin/shutdown $_reboot_type now" || \
@@ -723,7 +722,7 @@ nodes_roll() { _getargs '_parallel _only_reboot _master'
             fi
             nodes_alert final "$_node"
             _alert_pause
-            nodes_reboot "$_master" 0 "$_node"
+            nodes_reboot 0 "$_master" "$_node"
             instances_move "$_master" "$_node" 'to' $_moved_instances
             # Use watcher instead for now (see comment above)
             #instances_activate_disks "$_master" $_drbd_instances
@@ -757,10 +756,10 @@ nodes_roll() { _getargs '_parallel _only_reboot _master'
     parallel=$_orig_parallel
 }
 
-nodes_kill() { _getargs '_master'
+nodes_kill() { _getargs '_kill_mode _master'
     for _node do # @PAR_LOOP_BEGIN@
-        instances_kill "$_master" "$_node"
-        nodes_reboot "$_master" 1 "$_node"
+        instances_kill "$_kill_mode" "$_node"
+        nodes_reboot "$_kill_mode" "$_master" "$_node"
     done         # @PAR_LOOP_END@
 }
 
@@ -877,9 +876,9 @@ nodegroups_roll() { _getargs '_master'
     done              # @PAR_LOOP_END@
 }
 
-nodegroups_kill() { _getargs '_master'
+nodegroups_kill() { _getargs '_kill_mode _master'
     for _nodegroup do # @PAR_LOOP_BEGIN@
-        nodes_kill "$_master" $(nodes_get '' '' 1 "$_master" "$_nodegroup")
+        nodes_kill "$_kill_mode" "$_master" $(nodes_get '' '' 1 "$_master" "$_nodegroup")
     done              # @PAR_LOOP_END@
 }
 
@@ -1047,28 +1046,30 @@ clusters_roll() {
     done           # @PAR_LOOP_END@
 }
 
-clusters_kill() {
+clusters_kill() { _getargs '_kill_mode'
     for _master do # @PAR_LOOP_BEGIN@
-        nodegroups_kill "$_master" $(nodegroups_get "$_master")
-        watchers_run "$_master"
-        # @PAR_BLOCK_BEGIN@
-        clusters_alert_remove "$_master"
-        # @PAR_BLOCK_BARRIER@
-        clusters_untag 'locked' 'nodegroups' "$_master"
-        # @PAR_BLOCK_END@
+        nodegroups_kill "$_kill_mode" "$_master" $(nodegroups_get "$_master")
+        if test 2 -ne $_kill_mode; then
+            watchers_run "$_master"
+            # @PAR_BLOCK_BEGIN@
+            clusters_alert_remove "$_master"
+            # @PAR_BLOCK_BARRIER@
+            clusters_untag 'locked' 'nodegroups' "$_master"
+            # @PAR_BLOCK_END@
+        fi
     done           # @PAR_LOOP_END@
 }
 
 #### main invasive
 
-prerun() { _getargs '_cmd'
+prerun() { _getargs '_kill_mode _cmd'
     _warn 'About to execute %s on nodes which match:\n' "$_cmd"
     _warn '  (master-nodes) %s\n' "$masters"
     test -z "$nodegroups" || _warn '  (nodegroups %s)\n' "$nodegroups"
     test -z "$nodes" || _warn '  (nodes %s)\n' "$nodes"
     test -z "$instances" || _die 'specifying instances as matches (for matching their containing nodes) is not yet implemented.\n'
     #TODO: test -z "$instances" || _warn '  (instances %s)\n' "$instances"
-    if ! test 'kill' = "$_cmd" || test 1 -ne $maintenance; then
+    if test 2 -ne $_kill_mode; then
         _warn 'ARE YOU SURE? (Ctrl-C in the next 10 seconds if not).\n'
         if test 1 -ne $dryrun; then
             sleep 10
@@ -1077,10 +1078,10 @@ prerun() { _getargs '_cmd'
     fi
 }
 
-start() {
-    queues_lock "$@"
+start() { _getargs '_kill_mode'
+    test 2 -eq $_kill_mode || queues_lock "$@"
     watchers_pause "$@"
-    if test 1 -ne $serial_nodes && test 5 -gt $(
+    if test 0 -eq $_kill_mode && test 1 -ne $serial_nodes && test 5 -gt $(
         # ignore exit code - any failure will most likely also fail this test anyway
         _ssh_sudo 0 'normal' "$_master" 'grep -o -a -- '\''\(skip\|ignore\)-non-redundant\|one-step-only\|node-tags\|full-evacuation'\'' "$(which hroller)"' | wc -l
     ); then
@@ -1089,15 +1090,17 @@ start() {
     fi
 }
 
-finish() {
-    watchers_unpause "$@"
-    queues_unlock "$@"
-    clusters_verify "$@"
+finish() { _getargs '_kill_mode'
+    if test 2 -ne $_kill_mode; then
+        watchers_unpause "$@"
+        queues_unlock "$@"
+        clusters_verify "$@"
+    fi
 }
 
 roll() { set -- $(masters_canonical_get $masters)
     read -r top_pid _temp </proc/self/stat
-    prerun 'roll'
+    prerun 0 'roll'
     for _master do # @PAR_LOOP_BEGIN@
         read -r top_pid_cluster _temp </proc/self/stat
         # @PAR_BLOCK_BEGIN@
@@ -1106,25 +1109,31 @@ roll() { set -- $(masters_canonical_get $masters)
         clusters_alert 'start' "$_master"
         # @PAR_BLOCK_END@
         _alert_pause
-        start "$_master"
+        start 0 "$_master"
         clusters_roll "$_master"
-        finish "$_master"
+        finish 0 "$_master"
     done           # @PAR_LOOP_END@
 }
 
 kill() { set -- $(masters_canonical_get $masters)
     read -r top_pid _temp </proc/self/stat
-    prerun 'kill'
+    # _kill_mode => 0:not-a-kill, 1:kill-reboot-restore, 2:kill-asap-shutdown-exit
+    if _in 'needsmaintenance' $tags; then
+        _kill_mode=2
+    else
+        _kill_mode=1
+    fi
+    prerun "$_kill_mode" 'kill'
     for _master do # @PAR_LOOP_BEGIN@
         read -r top_pid_cluster _temp </proc/self/stat
         # @PAR_BLOCK_BEGIN@
         clusters_tag 'locked' 'nodegroups' "$_master"
         # @PAR_BLOCK_BARRIER@
-        clusters_alert 'start' "$_master"
+        test 2 -eq $_kill_mode || clusters_alert 'start' "$_master"
         # @PAR_BLOCK_END@
-        start "$_master"
-        clusters_kill "$_master"
-        finish "$_master"
+        start "$_kill_mode" "$_master"
+        clusters_kill "$_kill_mode" "$_master"
+        finish "$_kill_mode" "$_master"
     done          # @PAR_LOOP_END@
 }
 
