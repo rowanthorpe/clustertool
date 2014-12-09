@@ -600,10 +600,10 @@ nodes_alert() { _getargs '_type'
     if test 1 -eq $alerts; then
         case "$_type" in
             start)
-                _string='A rolling reboot or kill has been scheduled for this cluster. This node will reboot/shutdown sometime during the next few minutes (or up to a few hours). You will get another warning one minute before it happens.'
+                _string='A rolling reboot or kill has been scheduled for this cluster. This node will reboot/shutdown sometime during the next few minutes (or up to a few hours). You will get another warning just before it happens.'
                 ;;
             final)
-                _string='As part of a rolling reboot/kill this node will reboot/shutdown in one minute...'
+                _string='As part of a rolling reboot/kill this node will reboot/shutdown any moment...'
                 ;;
         esac
         # $_motd_string must be a oneliner
