@@ -114,7 +114,8 @@ _exit() {
     read -r _this_pid _temp </proc/self/stat
     trap '' TERM HUP INT
     ## next line is a sledgehammer backup plan (remove when confident with the rest of this)...
-    (setsid sh -c '/bin/sleep 1; /usr/bin/killall -9 clustertool.sh' </dev/null >/dev/null 2>&1 &)
+    test 'kill' = "$command" || \
+        (setsid sh -c '/bin/sleep 1; /usr/bin/killall -9 clustertool.sh' </dev/null >/dev/null 2>&1 &)
     # STOP $_pid
     test "x$_this_pid" = "x$_pid" || /bin/kill -s 'STOP' "$_pid"
     # signal all children of $_pid
