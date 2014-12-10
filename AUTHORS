@@ -6,16 +6,14 @@ See also the file ChangeLog
 
 ===
 
-Rowan Thorpe <rowan-at-noc-dot-grnet-dot-gr>:
+Designed and implemented clustertool:
+ Rowan Thorpe <rowan-at-noc-dot-grnet-dot-gr>
 
-  Designed and implemented clustertool
-
-Stella Korakaki <stella-at-noc-dot-grnet-dot-gr>,
-Giorgos Kargiotakis <kargig-at-noc-dot-grnet-dot-gr>,
-Alexandros Kiousis <alexk-at-noc-dot-grnet-dot-gr>,
-Nikos Kokkalis <nikolas-at-noc-dot-grnet-dot-gr>,
-Panagiotis Gotsis <pgotsis-at-noc-dot-grnet-dot-gr>,
-Kostis Fardelas <kosfar-at-noc-dot-grnet-dot-gr>,
-Konstantinos Tompoulidis <kostikas-at-noc-dot-grnet-dot-gr>:
-
-  Various suggestions, bug reports and feedback
+Various suggestions, bug reports and feedback:
+ Stella Korakaki <stella-at-noc-dot-grnet-dot-gr>
+ Giorgos Kargiotakis <kargig-at-noc-dot-grnet-dot-gr>
+ Alexandros Kiousis <alexk-at-noc-dot-grnet-dot-gr>
+ Nikos Kokkalis <nikolas-at-noc-dot-grnet-dot-gr>
+ Panagiotis Gotsis <pgotsis-at-noc-dot-grnet-dot-gr>
+ Kostis Fardelas <kosfar-at-noc-dot-grnet-dot-gr>
+ Konstantinos Tompoulidis <kostikas-at-noc-dot-grnet-dot-gr>
