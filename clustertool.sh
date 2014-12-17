@@ -38,8 +38,8 @@ fi
 for _path_elem in /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin; do
     ! printf '%s' "$PATH" | grep -q "\\(^\\|:\\)$_path_elem\\(\$\\|:\\)" || \
         PATH="${PATH}:$_path_elem"
-    export PATH
 done
+export PATH
 
 script_path="$(readlink -e "$0")"
 script="$(printf '%s' "$script_path" | sed -e 's:^.*/\([^/]\+\)$:\1:')"
