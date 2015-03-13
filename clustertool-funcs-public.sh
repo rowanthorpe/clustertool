@@ -158,7 +158,8 @@ instances_handler() { _getargs '_action _master'
     esac
     _jobs="$(
         for _instance do
-            if test 'move' = "$_action_args"; then
+            # *Don't* match "move ..." here, only "move"...
+            if test 'move' = "$_action"; then
                 _extra_args="-n $(
                     _singlequote_wrap "$(
                         {
