@@ -140,27 +140,30 @@ instances_handler() { _getargs '_action _master'
     _extra_args=''
     case "$_action" in
         migrate)
-            _action_args='migrate --allow-failover'
+            _action_args='migrate -f'
+            _extra_args='--allow-failover'
             ;;
         evacuate)
-            _action_args='replace-disks -I .'
+            _action_args='replace-disks'
+            _extra_args='-I .'
             ;;
         move)
-            _action_args='move'
+            _action_args='move -f'
             ;;
         move\ *)
-            _action_args='move'
+            _action_args='move -f'
             _extra_args="-n $(_singlequote_wrap "$(printf '%s' "$_action" | cut -d' ' -f2-)")"
             ;;
         cleanup)
-            _action_args='migrate --cleanup'
+            _action_args='migrate -f'
+            _extra_args='--cleanup'
             ;;
     esac
     _jobs="$(
         for _instance do
             # *Don't* match "move ..." here, only "move"...
             if test 'move' = "$_action"; then
-                _extra_args="-n $(
+                _extra_args="$_extra_args -n $(
                     _singlequote_wrap "$(
                         {
                             # No need to differentiate empty-set from real error here for hroller,
@@ -176,7 +179,7 @@ instances_handler() { _getargs '_action _master'
                     )"
                 )"
             fi
-            _ssh_sudo 1 'normal' "$_master" "gnt-instance $_action_args $_extra_args -f --submit --print-jobid '$_instance'" || \
+            _ssh_sudo 1 'normal' "$_master" "gnt-instance $_action_args $_extra_args --submit --print-jobid '$_instance'" || \
                 _die_r ${?:-$status} 'failed doing "%s" with extra args "%s" for instance "%s".\n' "$_action_args" "$_extra_args" "$_instance"
         done | _newline_to_space_pipe
     )"
