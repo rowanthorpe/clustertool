@@ -148,7 +148,7 @@ instances_handler() { _getargs '_action _master'
         move)
             _action_args='move'
             ;;
-        'move *')
+        move\ *)
             _action_args='move'
             _extra_args="-n $(_singlequote_wrap "$(printf '%s' "$_action" | cut -d' ' -f2-)")"
             ;;
