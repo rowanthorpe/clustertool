@@ -1,7 +1,7 @@
 # clustertool-funcs.sh (clustertool version 0.2.0)
 
 #  clustertool: a tool for automating/abstracting cluster operations
-#  Copyright © 2013-2014 Greek Research and Technology Network (GRNET S.A.)
+#  Copyright © 2013-2015 Greek Research and Technology Network (GRNET S.A.)
 #
 #  Developed by Rowan Thorpe (rowan-at-noc-dot-grnet-dot-gr) with
 #  additional contributions noted in the AUTHORS file in this distribution.

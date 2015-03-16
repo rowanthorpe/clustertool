@@ -3,7 +3,7 @@
 # clustertool.sh (clustertool version 0.2.0)
 
 #  clustertool: a tool for automating/abstracting cluster operations
-#  Copyright © 2013-2014 Greek Research and Technology Network (GRNET S.A.)
+#  Copyright © 2013-2015 Greek Research and Technology Network (GRNET S.A.)
 #
 #  Developed by Rowan Thorpe (rowan-at-noc-dot-grnet-dot-gr) with
 #  additional contributions noted in the AUTHORS file in this distribution.
@@ -241,7 +241,7 @@ case "$command" in
     -V|--version)
         cat <<EOV
 clustertool $clustertool_version
-Copyright © 2013-2014 Greek Research and Technology Network (GRNET S.A.)
+Copyright © 2013-2015 Greek Research and Technology Network (GRNET S.A.)
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
