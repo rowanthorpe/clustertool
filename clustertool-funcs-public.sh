@@ -702,9 +702,11 @@ nodes_roll() { _getargs '_parallel _only_reboot _master'
         fi
     fi
     for _node do # @PAR_LOOP_BEGIN@
-        ! test 'skip' = "$non_redundant_action" || \
-            test -z "$(instances_get 'primary' 'file plain' 0 "$_master" "$_node")" || \
+        if test 'skip' = "$non_redundant_action" && \
+           test -n "$(instances_get 'primary' 'file plain' 0 "$_master" "$_node")"; then
+            _warn 'Skipping non-redundant node "%s" as requested by the "-i skip" arg.\n' "$_node"
             continue
+        fi
         if ! node_recent_marker "$_node"; then
             if test 1 -ne $parallel; then
                 _orig_candidates="$(nodes_get 'not_offline master_candidate' '' 0 "$_master")"
