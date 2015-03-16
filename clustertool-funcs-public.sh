@@ -1106,6 +1106,9 @@ roll() { set -- $(masters_canonical_get $masters)
     read -r top_pid _temp </proc/self/stat
     prerun 0 'roll'
     for _master do # @PAR_LOOP_BEGIN@
+        #TODO: if in parallel mode loop each cluster inside setsid-subshell, copying in needed vars,
+        #      with no connection to controlling terminal, no interaction, etc (must tail logs to
+        #      track progress)
         read -r top_pid_cluster _temp </proc/self/stat
         # @PAR_BLOCK_BEGIN@
         clusters_tag "$tags" 'nodes' "$_master"
@@ -1129,6 +1132,9 @@ kill() { set -- $(masters_canonical_get $masters)
     fi
     prerun "$_kill_mode" 'kill'
     for _master do # @PAR_LOOP_BEGIN@
+        #TODO: if in parallel mode loop each cluster inside setsid-subshell, copying in needed vars,
+        #      with no connection to controlling terminal, no interaction, etc (must tail logs to
+        #      track progress)
         read -r top_pid_cluster _temp </proc/self/stat
         # @PAR_BLOCK_BEGIN@
         clusters_tag 'locked' 'nodegroups' "$_master"

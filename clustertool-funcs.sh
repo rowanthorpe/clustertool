@@ -65,30 +65,42 @@ log_dir="$temp_dir"
 skip_recent=0
 nodetypes_to_process='not_offline not_drained'
 clustertool_tty="${TTY:-$(tty)}"
-propagate_level=0
 
-_propagate_sigs() {
-    # this recursively signals the pids and all their children (except its own pid, if present)
-    _this_pid="$1"
-    _sigs="${2:-TERM}"
-    shift 2
-    propagate_level=`expr $propagate_level + 1`
-    for _sig in $_sigs; do
-        eval "
-            for _pid_$propagate_level do
-                if ! test 'x$_this_pid' = \"x\$_pid_$propagate_level\" ; then
-                    /bin/kill -s 'STOP' -- \"\$_pid_$propagate_level\"
-                    _propagate_sigs '$_this_pid' '$_sig' \
-                        \$(ps -o ppid= -o pid= | sed -n -e \"s/^ *\$_pid_$propagate_level \\{1,\\}//; t PRINT; b; : PRINT; p\" | tr '\\n' ' ')
-                    /bin/kill -s '$_sig' -- \"\$_pid_$propagate_level\"
-                    /bin/kill -s 'CONT' -- \"\$_pid_$propagate_level\"
-                fi
-            done
-        "
-    done
-    propagate_level=`expr $propagate_level - 1`
+_kill_pgid_tree() {
+    # TODO: The rule here is:
+    #  * When a kill is requested from this process, if running multiple clusters in parallel kill all
+    #    processes in the per-cluster process-group that this process is a part of, in all other cases
+    #    kill all processes in the entire clustertool process-group that this process is a part of
+    # (for now there is no per-cluster process-group handling, even in parallel mode, so it kills the
+    #  whole clustertool process-group either way)
+    printf 'clustertool: spawning process to reap processes and clean up (might cause some subshell "killed" output to shell)\n' >&2
+    ! test -d "$log_dir" || printf "clustertool: logfiles may be found in \"%s\" directory.\n" "$log_dir" >&2
+    if test 1 -eq $parallel; then
+        _pid="${top_pid_cluster:-${top_pid:-$$}}"
+    else
+        _pid="${top_pid:-$$}"
+    fi
+    _pgid="`ps --no-headers -p $_pid -o pgid=`"
+    (setsid sh -c '
+        # define _cleanup() and required vars inside the new shell session
+        '"$_cleanup_funcstr"'
+        temp_dir='"$temp_dir"'
+        command='"$command"'
+        script_id='"$script_id"'
+        log_dir='"$log_dir"'
+        _pid='"$_pid"'
+        _pgid='"$_pgid"'
+        for _sig; do
+            /bin/kill -s $_sig -- -$_pgid || : # failure should just mean processes already disappeared
+            /bin/sleep 0.05 || :            # try a microsleep, fallback to no sleep at all
+            pgrep -g $_pgid || break        # processes have gone
+        done
+        _cleanup
+    ' 'kill_pgid_tree' "$@" >/dev/null 2>&1 </dev/null &)
 }
 
+# Do this for easy function (re-)definition inside a new spawned session (e.g. setsid)
+_cleanup_funcstr='
 _cleanup() {
     rm -f $(find "${temp_dir:-.}" -mindepth 1 -maxdepth 1 \( \
         -name "clustertool-${command}-${script_id}.log.lock" -o \
@@ -97,41 +109,16 @@ _cleanup() {
         -printf "%p ") 2>/dev/null
     rmdir "$log_dir" 2>/dev/null
     rmdir "$temp_dir" 2>/dev/null
-    ! test -d "$log_dir" || printf "clustertool: logfiles may be found in \"%s\" directory.\n" "$log_dir" >&2
 }
+'
+eval "$_cleanup_funcstr"
 
 _exit() {
-    # Don't use _getargs() here - or any custom function other than _cleanup()
-    # and _propagate_sigs()
-    _retval="${1:-${?:-$status}}" # can be empty...
-    _sigs="$2" # can be empty...
-    if test 1 -eq $parallel; then
-        _pid="${3:-${top_pid_cluster:-${top_pid:-$$}}}"
-    else
-        _pid="${3:-${top_pid:-$$}}"
-    fi
-    printf '...[cleaning up, please wait]...' >&2
-    read -r _this_pid _temp </proc/self/stat
-    trap '' TERM HUP INT
-    ## next line is a sledgehammer backup plan (remove when confident with the rest of this)...
-    test 'kill' = "$command" || \
-        (setsid sh -c '/bin/sleep 1; /usr/bin/killall -9 clustertool.sh' </dev/null >/dev/null 2>&1 &)
-    # STOP $_pid
-    test "x$_this_pid" = "x$_pid" || /bin/kill -s 'STOP' "$_pid"
-    # signal all children of $_pid
-    _propagate_sigs "$_this_pid" "$_sigs" $(
-        ps -o ppid= -o pid= | sed -n -e "s/^ *${_pid} \\{1,\\}//; t PRINT; b; : PRINT; p" | tr "\\n" " "
-    )
-    _cleanup
-    printf "\\r$(tput el 2>/dev/null)" >&2
-    # now signal and CONTINUE $_pid
-    if ! test "x$_this_pid" = "x$_pid"; then
-        for _sig in "$_sigs"; do
-            /bin/kill -s "$_sig" "$_pid"
-        done
-        /bin/kill -s 'CONT' "$_pid"
-    fi
-    trap - TERM HUP INT
+    # Don't use _getargs() here - or any custom function other than _cleanup() or _kill_pgid_tree()
+    _retval="${1:-${?:-$status}}"
+    shift
+    test $# -ne 0 || set -- 'TERM' 'INT' 'KILL'
+    test 0 -eq $_retval || _kill_pgid_tree "$@"
     exit $_retval
 }
 

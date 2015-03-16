@@ -191,7 +191,8 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
                                reboot-groups roll in parallel by default - this
                                option causes spawning of subshells to process as
                                many other parts of the script as possible in
-                               parallel too (EXPERIMENTAL)
+                               parallel too, including each cluster
+                               (EXPERIMENTAL)
 
  DESCRIPTION
 
