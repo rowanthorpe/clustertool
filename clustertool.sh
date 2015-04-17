@@ -210,10 +210,13 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
   replaced with the (quote-escaped) node name in the template, for example:
 
     --monitor-trigger '\\
-        _ssh_sudo 1 normal icinga.domain.com \\
-            "/usr/local/bin/sched_downtime {} 36000"'
+        _ssh_sudo 1 normal icinga.domain.com "\\
+            sched_downtime {} 3600; \\
+            sched_svc_downtime master-node-name ganeti_freemem 3600; \\
+            sched_svc_downtime master-node-name ganeti_joblist 3600; \\
+        "'
 
-     => ... "/usr/local/bin/sched_downtime 'node-name' 36000"
+     => "sched_downtime 'node-name' 3600; sched_svc_downtime ..."
 
   ...the monitor-trigger should return zero unless something is wrong enough to
   stop clustertool, and the return value of the monitor-check-up is how the
