@@ -1,0 +1,57 @@
+{
+
+
+
+
+
+
+    "assigned": "Rowan Thorpe <rowan@noc.grnet.gr>", 
+
+
+
+
+
+
+    "creator": "Rowan Thorpe <rowan@rowanthorpe.com>", 
+
+
+
+
+
+
+    "reporter": "Giorgos Kargiotakis <kargig@noc.grnet.gr>", 
+
+
+
+
+
+
+    "severity": "wishlist", 
+
+
+
+
+
+
+    "status": "assigned", 
+
+
+
+
+
+
+    "summary": "If possible add functionality to reset a node's \"state\" via clustertool. What's needed is something like: ssh master.node sudo gnt-node modify -D 'no' node-name; ssh master.node sudo gnt-node remove-tags node-name needsreboot (there are three ways to do this: either include explicit commands for specific servers in the exit-warning, auto-run the commands as an exception-hook, or allow specific actions to be run on specific nodes run as manual commands). I - rowan - prefer the first option).", 
+
+
+
+
+
+
+    "time": "Fri, 17 Apr 2015 11:49:14 +0000"
+
+
+
+
+
+
+}
