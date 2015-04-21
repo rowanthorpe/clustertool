@@ -243,7 +243,7 @@ instances_migrate() { _getargs '_master _node'
 
 instances_move() { _getargs '_master _node _direction'
     # Accept initial list as args (to allow passing in fake values for dryrun)
-    if 'move' = "$non_redundant_action"; then
+    if test 'move' = "$non_redundant_action"; then
         case "$_direction" in
             from)
                 _arg='move'
