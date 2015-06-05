@@ -896,9 +896,10 @@ nodegroups_kill() { _getargs '_kill_mode _master'
 
 masters_canonical_get() {
     {
+        # Don't try to _die from here, just have empty output, and handle that as an error from
+        # one level up
         for _master do # @PAR_LOOP_BEGIN@
-            _ssh_sudo 0 'normal' "$_master" 'gnt-cluster getmaster' || \
-                _die_r ${?:-$status} 'failed to get canonical master URL from "%s".\n' "$_master"
+            _ssh_sudo 0 'normal' "$_master" 'gnt-cluster getmaster'
         done           # @PAR_LOOP_END@
     } | _newline_to_space_pipe
 }
@@ -1108,8 +1109,9 @@ finish() { _getargs '_kill_mode'
     fi
 }
 
-roll() { set -- $(masters_canonical_get $masters)
-    read -r top_pid _temp </proc/self/stat
+roll() { read -r top_pid _temp </proc/self/stat; set -- $(masters_canonical_get $masters)
+    test $# -eq `printf '%s\n' "$masters" | wc -w` || \
+        _die 'failed to get canonical master URL in list "%s".\n' "$masters"
     prerun 0 'roll'
     for _master do # @PAR_LOOP_BEGIN@
         #TODO: if in parallel mode loop each cluster inside setsid-subshell, copying in needed vars,
@@ -1128,8 +1130,9 @@ roll() { set -- $(masters_canonical_get $masters)
     done           # @PAR_LOOP_END@
 }
 
-kill() { set -- $(masters_canonical_get $masters)
-    read -r top_pid _temp </proc/self/stat
+kill() { read -r top_pid _temp </proc/self/stat; set -- $(masters_canonical_get $masters)
+    test $# -eq `printf '%s\n' "$masters" | wc -w` || \
+        _die 'failed to get canonical master URL in list "%s".\n' "$masters"
     # _kill_mode => 0:not-a-kill, 1:kill-reboot-restore, 2:kill-asap-shutdown-exit
     if _in 'needsmaintenance' $tags; then
         _kill_mode=2
