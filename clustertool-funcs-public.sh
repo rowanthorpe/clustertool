@@ -183,6 +183,10 @@ instances_handler() { _getargs '_action _master'
                 _die_r ${?:-$status} 'failed doing "%s" with extra args "%s" for instance "%s".\n' "$_action_args" "$_extra_args" "$_instance"
         done | _newline_to_space_pipe
     )"
+    # *Don't* handle errors here, just attempt the priority-change and continue, as the jobs have
+    # already started anyway
+    test -z "$change_priority" || \
+        _ssh_sudo 1 'normal' "$_master" "gnt-job change-priority --force --priority '$change_priority' $_jobs"
     jobs_wait "$_master" $_jobs
 }
 

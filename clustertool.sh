@@ -164,6 +164,9 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
                                for checking node-state at various points
   -x,--maintenance           : rather than rebooting each node shut it down and
                                wait for manual boot before continuing
+  -z,--change-priority XX    : attempt to change priority of migration jobs to
+                               XX (default:${change_priority}, "" means don't attempt
+                               priority-change)
 
  ==> very experimental options (not tested yet, YMMV)
 
@@ -401,6 +404,11 @@ while test $# -ne 0; do
             shift
             continue
             ;;
+        -z|--change-priority)
+            change_priority="$2"
+            shift 2
+            continue
+            ;;
         -M|--skip-master)
             skip_master=1
             shift
@@ -472,6 +480,14 @@ case "$non_redundant_action" in
     *)
         #_die 'unusable value "%s" for --non-redundant-action (should be skip|ignore|move).\n' "$non_redundant_action"
         _die 'unusable value "%s" for --non-redundant-action (should be skip|ignore).\n' "$non_redundant_action"
+        ;;
+esac
+case "$change_priority" in
+    low|normal|high|'')
+        :
+        ;;
+    *)
+        _die 'unusable value "%s" for --change-priority (should be low|normal|high|"").\n' "$change_priority"
         ;;
 esac
 if test 1 -eq $resume; then

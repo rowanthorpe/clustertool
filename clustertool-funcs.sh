@@ -50,6 +50,7 @@ parallel=0
 alerts=0
 timestamps=1
 maintenance=0
+change_priority='low'
 skip_master=0
 skip_non_vm_capable=0
 tags='needsreboot'
