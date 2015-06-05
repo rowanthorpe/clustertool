@@ -591,7 +591,7 @@ _list_from_cluster() { _getargs '_cmd_type _master _object_type _filters: _filte
                             ;;
                     esac
                 done
-                printf " ) $_filters_op "
+                printf ' ) '"$_filters_op "
             done | sed -e "\$ s/ $_filters_op \$//"
         fi
     )"
