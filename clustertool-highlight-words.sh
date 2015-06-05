@@ -40,7 +40,12 @@
 #       less -R -S
 
 if test -n "$ZSH_VERSION"; then
+    setopt shglob
+    setopt bsdecho
     setopt shwordsplit
+    NULLCMD=':'
+    export NULLCMD
+    emulate sh
     autoload colors && colors
     eval RESET='$reset_color'
     for COLOR in RED GREEN YELLOW BLUE MAGENTA CYAN BLACK WHITE; do
@@ -48,6 +53,7 @@ if test -n "$ZSH_VERSION"; then
         eval B$COLOR='$fg_bold[${(L)COLOR}]'
     done
 elif test -n "$BASH_VERSION"; then
+    set -o posix
     RESET=$'\e[0m'
     RED=$'\e[0;31m'
     GREEN=$'\e[0;32m'

@@ -30,9 +30,12 @@ test -z "$BASH_VERSION" || set -o posix
 
 # Make zshell behave similarly to other shells
 if test -n "$ZSH_VERSION"; then
+    setopt shglob
+    setopt bsdecho
     setopt shwordsplit
     NULLCMD=':'
     export NULLCMD
+    emulate sh
 fi
 
 for _path_elem in /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin; do
@@ -42,13 +45,12 @@ done
 export PATH
 
 script_path="$(readlink -e "$0")"
-script="$(printf '%s' "$script_path" | sed -e 's:^.*/\([^/]\+\)$:\1:')"
+script="$(basename "$script_path")"
 script_id=''
 
 ## source functions (default values, which are changed below in getopts, are set
 ##                   in clustertool-funcs.sh)
-libdir="$(printf '%s' "$script_path" | sed -e 's:/[^/]*$::')"
-test -n "$libdir" || libdir='/'
+libdir="$(dirname "$script_path")"
 . "${libdir}/clustertool-funcs.sh"
 
 trap '_die_s 129 "" "caught HUP interrupt\\n"' HUP

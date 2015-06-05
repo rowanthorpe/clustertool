@@ -33,8 +33,20 @@
 # clustertool-funcs.sh (it is safer to always keep private function
 # code explicit anyway)
 
-# Make zshell do auto word-splitting like other shells
-test -z "$ZSH_VERSION" || setopt shwordsplit
+# Try to get as much consistency between shells as possible
+# TODO: adding $KSH_VERSION to this test works for pdksh but kills ksh
+#       (how to distinguish between those two shells?)
+test -z "$BASH_VERSION" || set -o posix
+
+# Make zshell behave similarly to other shells
+if test -n "$ZSH_VERSION"; then
+    setopt shglob
+    setopt bsdecho
+    setopt shwordsplit
+    NULLCMD=':'
+    export NULLCMD
+    emulate sh
+fi
 
 _exit() { _retval="$1"; rm -f "$_tempfile1" "$_tempfile2" "$_tempfile3" >/dev/null 2>&1; exit $_retval; }
 
