@@ -51,13 +51,13 @@ jobs_wait() { _getargs '_master'
         _failed="$(
             {
                 for _job do
-                    _ssh_sudo 0 'invocation-specific' "$_master" "gnt-job $jobwait_arg '$_job'" >/dev/null || \
+                    _ssh_sudo 1 'invocation-specific' "$_master" "gnt-job $jobwait_arg '$_job'" >/dev/null || \
                         printf '%s ' "$_job"
                 done
-                _list_from_cluster 'invocation-specific' "$_master" 'job' "status:trim:success id:keep:$(
+                test 1 -eq $dryrun || _list_from_cluster 'invocation-specific' "$_master" 'job' "status:trim:success id:keep:$(
                     printf '%s|' "$@" | sed -e 's/|$//')"
             } | _uniq_list_pipe)"
-        test 1 -eq $dryrun || printf '%s' "$_failed"
+        printf '%s' "$_failed"
     fi
 }
 
@@ -168,9 +168,9 @@ instances_handler() { _getargs '_action _master'
                         {
                             # No need to differentiate empty-set from real error here for hroller,
                             # both are errors for us this time
-                            _ssh_sudo 0 'normal' "hroller -L -G $(
+                            _ssh_sudo 0 'tag' "hroller -L -G $(
                                 _singlequote_wrap "$(
-                                    _ssh_sudo 0 'normal' "$_master" "gnt-instance list -o 'pnode.group' --filter 'name == '\''$_instance'\'''" || \
+                                    _ssh_sudo 0 'tag' "$_master" "gnt-instance list -o 'pnode.group' --filter 'name == '\''$_instance'\'''" || \
                                         _die_r ${?:-$status} 'failed to get group-name for instance "%s".\n' "$_instance"
                                 )"
                             ) --print-moves --no-headers" || \
@@ -383,7 +383,7 @@ node_check_up() { _getargs '_node _ping_loops:60 _ping_sleep:5 _ssh_timeout:120'
     _cmdlog 0 'normal' 'sleep 30\n'
     test 1 -eq $dryrun || sleep 30
     _retval="$(
-        _ssh_sudo 0 'normal' "$_node" "printf 'ok'" "$_ssh_timeout" || \
+        _ssh_sudo 0 'tag' "$_node" "printf 'ok'" "$_ssh_timeout" || \
             _die_r ${?:-$status} 'failed to get ssh access to "%s".\n' "$_node")"
     _cmdlog 0 'normal' 'sleep 30\n'
     if test 1 -ne $dryrun; then
@@ -925,11 +925,9 @@ queues_empty() {
             _jobs="_fake_job_1_ _fake_job_2_"
             _info 'dryrun note: seeing we are not actually changing the queue we just populate the job-list with silly example values for the sake of syntax checking.\n'
         fi
-        if test -n "$_jobs"; then
-            _failed_jobs="$(jobs_wait "$_master" $_jobs)"
-            test -z "$_failed_jobs" || \
-                _die 'failed waiting for jobs "%s".\n' "$_failed_jobs"
-        fi
+        _failed_jobs="$(jobs_wait "$_master" $_jobs)"
+        test -z "$_failed_jobs" || \
+            _die 'failed waiting for jobs "%s".\n' "$_failed_jobs"
     done           # @PAR_LOOP_END@
 }
 
