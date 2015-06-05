@@ -347,16 +347,7 @@ while test $# -ne 0; do
             continue
             ;;
         -i|--non-redundant-action)
-            case "$2" in
-                #skip|ignore|move)
-                skip|ignore)
-                    non_redundant_action="$2"
-                    ;;
-                *)
-                    #_die 'unusable value "%s" for --non-redundant-action (should be skip|ignore|move).\n' "$2"
-                    _die 'unusable value "%s" for --non-redundant-action (should be skip|ignore).\n' "$2"
-                    ;;
-            esac
+            non_redundant_action="$2"
             shift 2
             continue
             ;;
@@ -436,8 +427,7 @@ while test $# -ne 0; do
             continue
             ;;
         -d|--log-dir)
-            log_dir="$(readlink -m "$2")"
-            mkdir -p "$log_dir" || _die_u 'unable to create log directory "%s".\n' "$log_dir"
+            log_dir="$2"
             shift 2
             continue
             ;;
@@ -469,6 +459,21 @@ while test $# -ne 0; do
     esac
 done
 test 1 -eq $batch || verbose=1
+if test $use_log -ne 0; then
+    log_dir="$(readlink -m "$log_dir")"
+    test -n "$log_dir" && mkdir -p "$log_dir" && test -d "$log_dir" || \
+        _die_u 'unable to create log directory "%s".\n' "$log_dir"
+fi
+case "$non_redundant_action" in
+    #skip|ignore|move)
+    skip|ignore)
+        :
+        ;;
+    *)
+        #_die 'unusable value "%s" for --non-redundant-action (should be skip|ignore|move).\n' "$non_redundant_action"
+        _die 'unusable value "%s" for --non-redundant-action (should be skip|ignore).\n' "$non_redundant_action"
+        ;;
+esac
 if test 1 -eq $resume; then
     test -n "$log_dir" || \
         _die_u 'you must specify --log-dir when using --resume.\n'
