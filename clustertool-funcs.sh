@@ -107,7 +107,7 @@ _cleanup() {
     rm -f $(find "${temp_dir:-.}" -mindepth 1 -maxdepth 1 \( \
         -name "clustertool-${command}-${script_id}.log.lock" -o \
         -name "clustertool-${command}-*.STDOUT.lock" -o \
-        -name "clustertool-${command}.STDERR.lock" \) \
+        -name "clustertool-${command}-*.STDERR.lock" \) \
         -printf "%p ") 2>/dev/null
     rmdir "$log_dir" 2>/dev/null
     rmdir "$temp_dir" 2>/dev/null
@@ -238,52 +238,60 @@ _in() { _getargs '_matcher' "$@"; shift $_to_shift
     return 1
 }
 
-_lock() { _getargs '_locktype _lockfile _to_eval' "$@"; shift $_to_shift
-    if test -x "$(which flock)"; then
-        flock $_locktype "$_lockfile" -c "$_to_eval" || \
-            _die_r ${?:-$status} 'failed evaluating %s with "flock %s" on %s.\n' "$(_singlequote_wrap "$_to_eval")" "$_locktype" "$(_singlequote_wrap "$_lockfile")"
-    else
-        eval "$_to_eval" || \
-            _die_r ${?:-$status} 'failed evaluating %s.\n' "$(_singlequote_wrap "$_to_eval")"
-    fi
+_mutex_release() {
+    _mutexfifo="${temp_dir}${temp_dir:+/}clustertool-${command}-${1}.lock"
+    printf 'x\n' >"$_mutexfifo"
 }
 
-_stdout_write() { _getargs '_proc_id' "$@"; shift $_to_shift
-    #FIXME: the "tty -s" shouldn't be necessary, and means that some subshell output might
-    #       still be interlaced...
-    if test 1 -eq $parallel && tty -s; then
-        _lockfile="${temp_dir}${temp_dir:+/}clustertool-${command}-${_proc_id}.STDOUT.lock"
-        _lock -x "$_lockfile" cat
+_mutex_init() {
+    _mutexfifo="${temp_dir}${temp_dir:+/}clustertool-${command}-${1}.lock"
+    rm -f "$_mutexfifo"
+    mkfifo "$_mutexfifo" || return 1
+    nohup _mutex_release "$_mutexfifo" </dev/null >/dev/null 2>&1 & # must do this to allow first use of the mutex
+}
+
+_mutex_acquire() {
+    _mutexfifo="${temp_dir}${temp_dir:+/}clustertool-${command}-${1}.lock"
+    test -p "$_mutexfifo" || _mutex_init "$1" || return 1
+    _mutex=''
+    while test -z "$_mutex"; do
+        read _mutex <"$_mutexfifo" || return 1
+    done
+}
+
+_mutex_do() {
+    _mutex_acquire "$1" || return 1
+    eval "$2"
+    _retval=${?:-$status}
+    _mutex_release "$1" || return 1
+    return $_retval
+}
+
+_stdout_write() {
+    if test 1 -eq $parallel; then
+        _mutex_do "${proc_id}.STDOUT" cat
     else
         cat
     fi
 }
 
 _log_write() { # [quiet/silent/append]
-    if test 1 -eq $use_log && test -n "$script_id"; then
-        _logfile="${log_dir}${log_dir:+/}clustertool-${command}-${script_id}.log"
-        _lockfile="${temp_dir}${temp_dir:+/}clustertool-${command}-${script_id}.log.lock"
-    else
-        _logfile=''
-        _lockfile="${temp_dir}${temp_dir:+/}clustertool-${command}.STDERR.lock"
-    fi
-    if _in quiet "$@" && test 1 -ne $dryrun && test 1 -ne $verbose; then
-        set -- "$@" silent
-    fi
+    _in silent "$@" || ! _in quiet "$@" || test 1 -eq $dryrun || test 1 -eq $verbose || set -- "$@" silent
     if _in silent "$@"; then
         _visible_output='/dev/null'
     else
         _visible_output='&2'
     fi
-    _eval_code="
-        if test -n $(_singlequote_wrap "$_logfile"); then
-            tee $(! _in append "$@" || printf -- -a) $(_singlequote_wrap "$_logfile") >$_visible_output
-        else
-            cat >$_visible_output
-        fi
-    "
+    if test 1 -eq $use_log && test -n "$script_id"; then
+        _eval_code="
+            tee $(! _in append "$@" || printf -- -a) \
+                $(_singlequote_wrap "${log_dir}${log_dir:+/}clustertool-${command}-${script_id}.log") >$_visible_output
+        "
+    else
+        _eval_code="cat >$_visible_output"
+    fi
     if test 1 -eq $parallel; then
-        _lock -x "$_lockfile" "$_eval_code"
+        _mutex_do "${proc_id}.STDERR" "$_eval_code"
     else
         eval "$_eval_code"
     fi
@@ -291,15 +299,11 @@ _log_write() { # [quiet/silent/append]
 
 _log_read() {
     if test 1 -eq $use_log && test -n "$script_id"; then
-        _logfile="${log_dir}${log_dir:+/}clustertool-${command}-${script_id}.log"
-        _lockfile="${temp_dir}${temp_dir:+/}clustertool-${command}-${script_id}.log.lock"
-        if test -f "$_logfile"; then
-            _eval_code="cat $(_singlequote_wrap "$_logfile")"
-            if test 1 -eq $parallel; then
-                _lock -s "$_lockfile" "$_eval_code"
-            else
-                eval "$_eval_code"
-            fi
+        _eval_code="cat $(_singlequote_wrap "${log_dir}${log_dir:+/}clustertool-${command}-${script_id}.log")"
+        if test 1 -eq $parallel; then
+            _mutex_do "${script_id}.log" "$_eval_code"
+        else
+            eval "$_eval_code"
         fi
     fi
 }
