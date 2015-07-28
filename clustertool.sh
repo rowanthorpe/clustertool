@@ -89,23 +89,20 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
  ==> basic options
 
   -h,--help                  : this message
-  -q,--quiet                 : the opposite of --verbose (default)
+  -V,--version               : output clustertool version information
   -S,--source                : show source code with all sourced libs and reader
                                macros expanded and code generation done inline
-  -V,--version               : output clustertool version information
+  -v,--verbose               : increase output
+  -q,--quiet                 : the opposite of --verbose (default)
+  -b,--no-batch              : have an interactive prompt before every invasive
+                               action (for testing/monitoring clustertool
+                               behaviour safely), rather than just using
+                               defaults based on other flags (implies --verbose)
 
  ==> required options (for now until bugs are fixed)
 
   -s,--serial-nodes          : roll nodes serially regardless of other settings
                                implied by the arguments
-
- ==> recommended options (for now until the tool stabilises)
-
-  -b,--no-batch              : have an interactive prompt before every invasive
-                               action (for testing/monitoring clustertool
-                               behaviour safely), rather than just using
-                               defaults based on other flags (implies --verbose)
-  -v,--verbose               : increase output
 
  ==> well-tested options
 
@@ -480,8 +477,8 @@ case "$non_redundant_action" in
         :
         ;;
     *)
-        #_die 'unusable value "%s" for --non-redundant-action (should be skip|ignore|move).\n' "$non_redundant_action"
-        _die 'unusable value "%s" for --non-redundant-action (should be skip|ignore).\n' "$non_redundant_action"
+        #_die_u 'unusable value "%s" for --non-redundant-action (should be skip|ignore|move).\n' "$non_redundant_action"
+        _die_u 'unusable value "%s" for --non-redundant-action (should be skip|ignore).\n' "$non_redundant_action"
         ;;
 esac
 case "$change_priority" in
@@ -489,7 +486,7 @@ case "$change_priority" in
         :
         ;;
     *)
-        _die 'unusable value "%s" for --change-priority (should be low|normal|high|"").\n' "$change_priority"
+        _die_u 'unusable value "%s" for --change-priority (should be low|normal|high|"").\n' "$change_priority"
         ;;
 esac
 if test 1 -eq $resume; then
