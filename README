@@ -167,6 +167,12 @@ just hostname, and this flag is a bit less well-tested):
 Tips/related tools
 ------------------
 
+Use profiles so you don't have to remember epic flag-combinations:
+
+ Profiles can be edited in clustertool-profiles.sh and used with the
+ --profile flag. They save a lot of time. There is an example profiles
+ file, adapt it to your needs.
+
 Finding the most recent log file:
 
  When using "--resume last" clustertool automatically appends to the most
