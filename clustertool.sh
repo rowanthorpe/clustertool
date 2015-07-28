@@ -566,6 +566,54 @@ fi
 ## main
 masters="$*"
 set --
+## DEBUG BEGIN
+#cat <<EOF >&2
+#clustertool_version: $clustertool_version
+#actions_started: $actions_started
+#test_string: $test_string
+#dryrun: $dryrun
+#dryrun_no_tag: $dryrun_no_tag
+#batch: $batch
+#verbose: $verbose
+#profile: $profile
+#resume: $resume
+#evacuate: $evacuate
+#nodegroups: $nodegroups
+#nodes: $nodes
+#instances: $instances
+#rebalance: $rebalance
+#lock_cluster: $lock_cluster
+#lock_node: $lock_node
+#non_redundant_action: $non_redundant_action
+#pause_watcher: $pause_watcher
+#custom_commands_string: $custom_commands_string
+#custom_commands_file: $custom_commands_file
+#mailto: $mailto
+#reboot_groups: $reboot_groups
+#serial_nodes: $serial_nodes
+#parallel: $parallel
+#alerts: $alerts
+#timestamps: $timestamps
+#maintenance: $maintenance
+#change_priority: $change_priority
+#skip_master: $skip_master
+#skip_non_vm_capable: $skip_non_vm_capable
+#tags: $tags
+#use_log: $use_log
+#monitor_trigger_template: $monitor_trigger_template
+#monitor_check_up_template: $monitor_check_up_template
+#in_die_func: $in_die_func
+#test_version: $test_version
+#libdir: $libdir
+#funcnames: $funcnames
+#temp_dir: $temp_dir
+#log_dir: $log_dir
+#skip_recent: $skip_recent
+#nodetypes_to_process: $nodetypes_to_process
+#clustertoo_tty: $clustertool_tty
+#EOF
+## DEBUG END
+
 case "$command" in
     test)
         read -r top_pid _temp </proc/self/stat
