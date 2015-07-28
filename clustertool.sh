@@ -99,6 +99,11 @@ Usage: $script COMMAND OPTIONS "master-node" ["master-node" ...]
                                behaviour safely), rather than just using
                                defaults based on other flags (implies --verbose)
 
+ ==> profiles
+
+  -f,--profile XX            : bundled selection of flags defined in
+                               clustertool-profiles.sh
+
  ==> required options (for now until bugs are fixed)
 
   -s,--serial-nodes          : roll nodes serially regardless of other settings
@@ -281,6 +286,24 @@ while test $# -ne 0; do
         -h|--help|-V--version|-S|--source)
             _cleanup
             exec "$script_path" "$1"
+            ;;
+        -f|--profile)
+            profile="$2"
+            export profile
+            if test -n "$profile"; then
+                _to_eval="$(
+                    ## source profiles (which are used by the --profile getopt)
+                    ! test -e "${libdir}/clustertool-profiles.sh" || . "${libdir}/clustertool-profiles.sh"
+                    ! _in "$profile" $profiles || eval "printf '%s\\n' \"\$profile_$profile\""
+                )"
+                if test -n "$_to_eval"; then
+                    eval "$_to_eval"
+                else
+                    _die_u 'unknown value "%s" for --profile (should be one of the profiles listed in clustertool-profile.sh).\n' "$profile"
+                fi
+            fi
+            shift 2
+            continue
             ;;
         -v|--verbose)
             verbose=1

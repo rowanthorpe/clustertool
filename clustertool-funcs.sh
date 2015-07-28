@@ -30,6 +30,7 @@ dryrun=0
 dryrun_no_tag=0
 batch=1
 verbose=0
+profile=''
 resume=0
 evacuate=0
 nodegroups=''
