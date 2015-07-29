@@ -512,6 +512,8 @@ case "$change_priority" in
         _die_u 'unusable value "%s" for --change-priority (should be low|normal|high|"").\n' "$change_priority"
         ;;
 esac
+test 0 -eq $parallel || \
+    _die 'all subshell/parallel functionality has been fully disabled in this version of clustertool, so using --parallel is especially pointless\n'
 if test 1 -eq $resume; then
     test -n "$log_dir" || \
         _die_u 'you must specify --log-dir when using --resume.\n'

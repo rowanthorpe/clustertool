@@ -50,13 +50,19 @@ fi
 
 _exit() { _retval="$1"; rm -f "$_tempfile1" "$_tempfile2" "$_tempfile3" >/dev/null 2>&1; exit $_retval; }
 
-_tempfile1="$(mktemp)" && _tempfile2="$(mktemp)" && _tempfile3="$(mktemp)" && \
+## Reaping of parallel processes still seems problematic, so this is commented and we use the version
+## below with no subshell spawing
+#_tempfile1="$(mktemp)" && _tempfile2="$(mktemp)" && _tempfile3="$(mktemp)" && \
+#    sed -n -e '/^#### BEGIN_FUNC ####$/,/^#### END_FUNC ####$/ {s/^# //; p}' "$0" >"$_tempfile1" && \
+#    sed -n -e '/^#### BEGIN_LOOP ####$/,/^#### END_LOOP ####$/ {s/^# //; p}' "$0" >"$_tempfile2" && \
+#    sed -n -e '/^#### BEGIN_BLOCK ####$/,/^#### END_BLOCK ####$/ {s/^# //; p}' "$0" >"$_tempfile3" && \
+#    sed -f "$_tempfile1" | \
+#    sed -f "$_tempfile2" | \
+#    sed -f "$_tempfile3"
+#_exit ${?:-$status}
+_tempfile1="$(mktemp)" && \
     sed -n -e '/^#### BEGIN_FUNC ####$/,/^#### END_FUNC ####$/ {s/^# //; p}' "$0" >"$_tempfile1" && \
-    sed -n -e '/^#### BEGIN_LOOP ####$/,/^#### END_LOOP ####$/ {s/^# //; p}' "$0" >"$_tempfile2" && \
-    sed -n -e '/^#### BEGIN_BLOCK ####$/,/^#### END_BLOCK ####$/ {s/^# //; p}' "$0" >"$_tempfile3" && \
-    sed -f "$_tempfile1" | \
-    sed -f "$_tempfile2" | \
-    sed -f "$_tempfile3"
+    sed -f "$_tempfile1"
 _exit ${?:-$status}
 
 #### BEGIN_FUNC ####
